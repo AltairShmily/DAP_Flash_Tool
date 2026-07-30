@@ -1,7 +1,61 @@
-"""Base Driver - Abstract interface for debug probe drivers.
+from abc import ABC, abstractmethod
+from typing import Callable, Optional
+from dataclasses import dataclass
 
-Defines the common interface that all debug probe drivers must implement,
-including connect/disconnect, flash read/write, erase, and reset operations.
-"""
 
-# TODO: Define BaseDriver abstract class
+@dataclass
+class ProbeInfo:
+    id: str
+    name: str
+    vendor: str
+    serial_number: str
+
+
+@dataclass
+class ChipInfo:
+    chip_id: int
+    description: str
+
+
+class BaseDriver(ABC):
+    """Driver abstraction base class."""
+
+    @abstractmethod
+    def list_probes(self) -> list[ProbeInfo]:
+        """List available debug probes."""
+        ...
+
+    @abstractmethod
+    def connect(self, probe_id: str, target: str, frequency: int, protocol: str = "swd") -> None:
+        """Connect to target device."""
+        ...
+
+    @abstractmethod
+    def disconnect(self) -> None:
+        """Disconnect from target."""
+        ...
+
+    @abstractmethod
+    def is_connected(self) -> bool:
+        """Check if connected to target."""
+        ...
+
+    @abstractmethod
+    def flash(self, file_path: str, address: int, callback: Callable[[float, str], None]) -> None:
+        """Flash firmware. callback(progress, message) for progress updates."""
+        ...
+
+    @abstractmethod
+    def erase(self, mode: str = "chip") -> None:
+        """Erase chip. mode: 'chip' or 'sector'."""
+        ...
+
+    @abstractmethod
+    def reset(self) -> None:
+        """Reset target."""
+        ...
+
+    @abstractmethod
+    def read_chip_id(self) -> ChipInfo:
+        """Read chip ID."""
+        ...
