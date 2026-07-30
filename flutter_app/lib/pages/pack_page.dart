@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../l10n/app_strings.dart';
 import '../providers/pack_provider.dart';
 import '../widgets/collapsible_card.dart';
 
@@ -63,6 +64,7 @@ class _PackPageState extends ConsumerState<PackPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final packState = ref.watch(packProvider);
+    final strings = AppStrings.of(context);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -71,9 +73,9 @@ class _PackPageState extends ConsumerState<PackPage> {
         children: [
           // ── Search & Actions ──
           CollapsibleCard(
-            title: 'Pack Management',
+            title: strings.packManagement,
             icon: Icons.inventory_2,
-            subtitle: '${_mockPacks.length} packs loaded',
+            subtitle: '${_mockPacks.length} ${strings.packsLoaded}',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -81,7 +83,7 @@ class _PackPageState extends ConsumerState<PackPage> {
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Search packs or chips...',
+                    hintText: strings.searchPacksOrChips,
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
@@ -104,38 +106,35 @@ class _PackPageState extends ConsumerState<PackPage> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          // TODO: Implement scan local directories for .pack files via gRPC
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Scan directories — gRPC not yet connected')),
+                            SnackBar(content: Text(strings.scanDirNotConnected)),
                           );
                         },
                         icon: const Icon(Icons.folder_open),
-                        label: const Text('Scan Directory'),
+                        label: Text(strings.scanDirectory),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          // TODO: Implement import .pack file
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Import pack — gRPC not yet connected')),
+                            SnackBar(content: Text(strings.importNotConnected)),
                           );
                         },
                         icon: const Icon(Icons.add),
-                        label: const Text('Import Pack'),
+                        label: Text(strings.importPack),
                       ),
                     ),
                     const SizedBox(width: 8),
                     IconButton.filledTonal(
                       onPressed: () {
-                        // TODO: Implement refresh via gRPC
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Refresh — gRPC not yet connected')),
+                          SnackBar(content: Text(strings.refreshNotConnected)),
                         );
                       },
                       icon: const Icon(Icons.refresh),
-                      tooltip: 'Refresh',
+                      tooltip: strings.refresh,
                     ),
                   ],
                 ),
@@ -161,14 +160,12 @@ class _PackPageState extends ConsumerState<PackPage> {
                     Icon(Icons.inventory_2_outlined, size: 48, color: theme.colorScheme.outline),
                     const SizedBox(height: 8),
                     Text(
-                      _searchQuery.isEmpty ? 'No packs installed' : 'No packs match your search',
+                      _searchQuery.isEmpty ? strings.noPacksInstalled : strings.noPacksMatchSearch,
                       style: theme.textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _searchQuery.isEmpty
-                          ? 'Scan a directory or import a .pack file to get started'
-                          : 'Try a different search term',
+                      _searchQuery.isEmpty ? strings.scanOrImportHint : strings.tryDifferentSearch,
                       style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
                     ),
                   ],
@@ -184,7 +181,6 @@ class _PackPageState extends ConsumerState<PackPage> {
                   pack: pack,
                   isSelected: packState.selectedPack == pack.name,
                   onSelect: () {
-                    // TODO: Wire up gRPC call to load pack chips
                     ref.read(packProvider.notifier).selectPack(pack.name);
                     ref.read(packProvider.notifier).setChips(pack.chips);
                   },
@@ -196,9 +192,9 @@ class _PackPageState extends ConsumerState<PackPage> {
           if (packState.selectedPack != null && packState.availableChips.isNotEmpty) ...[
             const SizedBox(height: 8),
             CollapsibleCard(
-              title: 'Chips in ${packState.selectedPack}',
+              title: '${strings.chipsIn} ${packState.selectedPack}',
               icon: Icons.memory,
-              subtitle: '${packState.availableChips.length} chips',
+              subtitle: '${packState.availableChips.length} ${strings.chips}',
               child: Wrap(
                 spacing: 8,
                 runSpacing: 8,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:file_picker/file_picker.dart';
 import '../providers/theme_provider.dart';
+import '../providers/flash_provider.dart';
 import '../providers/locale_provider.dart';
 import '../l10n/app_strings.dart';
 import '../widgets/sidebar.dart';
@@ -153,8 +155,38 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
+  Future<void> _pickFirmware() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['bin', 'hex', 'elf'],
+    );
+    if (result != null && result.files.single.path != null) {
+      final file = result.files.single;
+      final ext = file.extension?.toLowerCase() ?? '';
+      String format;
+      switch (ext) {
+        case 'hex':
+          format = 'HEX';
+          break;
+        case 'elf':
+          format = 'ELF';
+          break;
+        case 'bin':
+        default:
+          format = 'BIN';
+          break;
+      }
+      ref.read(flashProvider.notifier).setFirmware(file.path!, format);
+    }
+  }
+
   Widget _buildFlashPage(AppStrings strings) {
-    return SingleChildScrollView(
+    final flashState = ref.watch(flashProvider);
+    final firmwareName = flashState.firmwarePath != null
+        ? flashState.firmwarePath!.split('/').last.split('\\').last
+        : null;
+
+    return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -187,15 +219,26 @@ class _HomePageState extends ConsumerState<HomePage> {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: () {},
+                        onPressed: _pickFirmware,
                         icon: const Icon(Icons.folder_open),
-                        label: Text(strings.selectFirmware),
+                        label: Text(firmwareName ?? strings.selectFirmware),
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const Chip(label: Text('HEX')),
+                    Chip(label: Text(flashState.firmwareFormat ?? '—')),
                   ],
                 ),
+                if (flashState.firmwarePath != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    flashState.firmwarePath!,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -262,22 +305,27 @@ class _HomePageState extends ConsumerState<HomePage> {
             ),
           ),
           const SizedBox(height: 8),
-          CollapsibleCard(
-            title: strings.outputLog,
-            icon: Icons.terminal,
-            initiallyExpanded: true,
-            child: Container(
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.black87,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                strings.logReady,
-                style: const TextStyle(
-                  color: Colors.greenAccent,
-                  fontFamily: 'monospace',
+          Expanded(
+            child: CollapsibleCard(
+              title: strings.outputLog,
+              icon: Icons.terminal,
+              initiallyExpanded: true,
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 200),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.black87,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.all(8),
+                child: SingleChildScrollView(
+                  child: Text(
+                    strings.logReady,
+                    style: const TextStyle(
+                      color: Colors.greenAccent,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
                 ),
               ),
             ),

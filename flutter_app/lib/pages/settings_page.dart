@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/app_strings.dart';
 import '../providers/theme_provider.dart';
 import '../providers/history_provider.dart';
 import '../widgets/collapsible_card.dart';
@@ -78,6 +79,7 @@ class SettingsPage extends ConsumerWidget {
     final theme = Theme.of(context);
     final themeMode = ref.watch(themeModeProvider);
     final settings = ref.watch(settingsProvider);
+    final strings = AppStrings.of(context);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -86,30 +88,30 @@ class SettingsPage extends ConsumerWidget {
         children: [
           // ── Appearance ──
           CollapsibleCard(
-            title: 'Appearance',
+            title: strings.appearance,
             icon: Icons.palette,
-            subtitle: _themeModeLabel(themeMode),
+            subtitle: _themeModeLabel(themeMode, strings),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Theme', style: theme.textTheme.labelLarge),
+                Text(strings.theme, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 SegmentedButton<ThemeMode>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: ThemeMode.system,
-                      label: Text('System'),
-                      icon: Icon(Icons.brightness_auto),
+                      label: Text(strings.systemMode),
+                      icon: const Icon(Icons.brightness_auto),
                     ),
                     ButtonSegment(
                       value: ThemeMode.light,
-                      label: Text('Light'),
-                      icon: Icon(Icons.light_mode),
+                      label: Text(strings.lightMode),
+                      icon: const Icon(Icons.light_mode),
                     ),
                     ButtonSegment(
                       value: ThemeMode.dark,
-                      label: Text('Dark'),
-                      icon: Icon(Icons.dark_mode),
+                      label: Text(strings.darkMode),
+                      icon: const Icon(Icons.dark_mode),
                     ),
                   ],
                   selected: {themeMode},
@@ -124,17 +126,17 @@ class SettingsPage extends ConsumerWidget {
 
           // ── Driver ──
           CollapsibleCard(
-            title: 'Debug Driver',
+            title: strings.debugDriver,
             icon: Icons.build,
-            subtitle: settings.driver == 'pyocd' ? 'PyOCD' : 'OpenOCD',
+            subtitle: settings.driver == 'pyocd' ? strings.pyocd : strings.openocd,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Select Debug Probe Driver', style: theme.textTheme.labelLarge),
+                Text(strings.selectDebugDriver, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 RadioListTile<String>(
-                  title: const Text('PyOCD'),
-                  subtitle: const Text('ARM DAPLink debug probe driver'),
+                  title: Text(strings.pyocd),
+                  subtitle: Text(strings.pyocdSubtitle),
                   value: 'pyocd',
                   groupValue: settings.driver,
                   onChanged: (v) {
@@ -144,8 +146,8 @@ class SettingsPage extends ConsumerWidget {
                   dense: true,
                 ),
                 RadioListTile<String>(
-                  title: const Text('OpenOCD'),
-                  subtitle: const Text('Open On-Chip Debugger'),
+                  title: Text(strings.openocd),
+                  subtitle: Text(strings.openocdSubtitle),
                   value: 'openocd',
                   groupValue: settings.driver,
                   onChanged: (v) {
@@ -161,14 +163,14 @@ class SettingsPage extends ConsumerWidget {
 
           // ── Defaults ──
           CollapsibleCard(
-            title: 'Flash Defaults',
+            title: strings.flashDefaults,
             icon: Icons.tune,
             subtitle: '${_freqLabel(settings.frequency)} · ${settings.protocol.toUpperCase()}',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Frequency dropdown
-                Text('Default Frequency', style: theme.textTheme.labelLarge),
+                Text(strings.defaultFrequency, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   value: settings.frequency,
@@ -190,7 +192,7 @@ class SettingsPage extends ConsumerWidget {
                 const SizedBox(height: 16),
 
                 // Protocol radio
-                Text('Default Protocol', style: theme.textTheme.labelLarge),
+                Text(strings.defaultProtocol, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 SegmentedButton<String>(
                   segments: const [
@@ -217,7 +219,7 @@ class SettingsPage extends ConsumerWidget {
 
           // ── History ──
           CollapsibleCard(
-            title: 'Flash History',
+            title: strings.flashHistory,
             icon: Icons.history,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -226,7 +228,7 @@ class SettingsPage extends ConsumerWidget {
                   builder: (context, ref, _) {
                     final records = ref.watch(historyProvider);
                     return Text(
-                      '${records.length} record${records.length == 1 ? '' : 's'} stored',
+                      '${records.length} ${strings.recordsStored}',
                       style: theme.textTheme.bodyMedium,
                     );
                   },
@@ -237,11 +239,11 @@ class SettingsPage extends ConsumerWidget {
                     final confirmed = await showDialog<bool>(
                       context: context,
                       builder: (ctx) => AlertDialog(
-                        title: const Text('Clear History'),
-                        content: const Text('This will permanently delete all flash history records. Continue?'),
+                        title: Text(strings.clearHistory),
+                        content: Text(strings.clearHistoryConfirm),
                         actions: [
-                          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Clear')),
+                          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(strings.cancel)),
+                          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(strings.clear)),
                         ],
                       ),
                     );
@@ -249,13 +251,13 @@ class SettingsPage extends ConsumerWidget {
                       ref.read(historyProvider.notifier).clearHistory();
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('History cleared')),
+                          SnackBar(content: Text(strings.historyCleared)),
                         );
                       }
                     }
                   },
                   icon: const Icon(Icons.delete_outline),
-                  label: const Text('Clear History'),
+                  label: Text(strings.clearHistory),
                 ),
               ],
             ),
@@ -264,19 +266,18 @@ class SettingsPage extends ConsumerWidget {
 
           // ── About ──
           CollapsibleCard(
-            title: 'About',
+            title: strings.about,
             icon: Icons.info_outline,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _aboutRow('Application', 'DAP Flash Tool'),
-                _aboutRow('Version', 'v0.1.0'),
+                _aboutRow(strings.application, 'DAP Flash Tool'),
+                _aboutRow(strings.version, 'v0.1.0'),
                 _aboutRow('Flutter', '3.x / Riverpod'),
                 _aboutRow('Backend', 'Rust + gRPC'),
                 const Divider(height: 24),
                 Text(
-                  'A cross-platform ARM chip flash tool powered by CMSIS-DAP debug probes. '
-                  'Supports .pack chip database and HEX/BIN firmware files.',
+                  strings.aboutDescription,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -303,14 +304,14 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  static String _themeModeLabel(ThemeMode mode) {
+  static String _themeModeLabel(ThemeMode mode, AppStrings strings) {
     switch (mode) {
       case ThemeMode.light:
-        return 'Light';
+        return strings.lightMode;
       case ThemeMode.dark:
-        return 'Dark';
+        return strings.darkMode;
       case ThemeMode.system:
-        return 'System';
+        return strings.systemMode;
     }
   }
 
