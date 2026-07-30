@@ -96,8 +96,10 @@ jobs:
           cache: true
 
       - name: Generate Windows platform files
-        working-directory: flutter_app
-        run: flutter create --platforms=windows .
+        shell: bash
+        run: |
+          rm -rf flutter_app/windows
+          cd flutter_app && flutter create --platforms=windows .
 
       - name: Install protoc
         shell: bash
