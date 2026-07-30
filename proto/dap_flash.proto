@@ -1,0 +1,124 @@
+syntax = "proto3";
+package dap_flash;
+
+import "google/protobuf/empty.proto";
+
+service DapFlashService {
+  // Device management
+  rpc ListProbes(google.protobuf.Empty) returns (ProbeList);
+  rpc ConnectProbe(ConnectRequest) returns (ConnectResponse);
+  rpc DisconnectProbe(google.protobuf.Empty) returns (google.protobuf.Empty);
+
+  // Flash operations (streaming progress)
+  rpc FlashFirmware(FlashRequest) returns (stream ProgressUpdate);
+  rpc EraseChip(EraseRequest) returns (stream ProgressUpdate);
+  rpc ResetTarget(google.protobuf.Empty) returns (OperationResult);
+  rpc ReadChipId(google.protobuf.Empty) returns (ChipIdResult);
+
+  // Pack management
+  rpc ListPacks(google.protobuf.Empty) returns (PackList);
+  rpc SearchPacks(SearchRequest) returns (PackSearchResult);
+  rpc DownloadPack(DownloadRequest) returns (stream ProgressUpdate);
+
+  // History
+  rpc GetFlashHistory(google.protobuf.Empty) returns (FlashHistoryList);
+}
+
+message Probe {
+  string id = 1;
+  string name = 2;
+  string vendor = 3;
+  string serial_number = 4;
+}
+
+message ProbeList {
+  repeated Probe probes = 1;
+}
+
+message ConnectRequest {
+  string probe_id = 1;
+  string target = 2;
+  int32 frequency = 3;
+  string protocol = 4;
+}
+
+message ConnectResponse {
+  bool success = 1;
+  string error_message = 2;
+  string target_name = 3;
+}
+
+message FlashRequest {
+  string firmware_path = 1;
+  int64 start_address = 2;
+  string driver = 3;
+}
+
+message ProgressUpdate {
+  enum Phase {
+    CONNECTING = 0;
+    ERASING = 1;
+    PROGRAMMING = 2;
+    VERIFYING = 3;
+    RESETTING = 4;
+  }
+  Phase phase = 1;
+  float progress = 2;
+  int64 bytes_written = 3;
+  int64 total_bytes = 4;
+  string message = 5;
+}
+
+message OperationResult {
+  bool success = 1;
+  string message = 2;
+}
+
+message ChipIdResult {
+  uint32 chip_id = 1;
+  string description = 2;
+}
+
+message EraseRequest {
+  string mode = 1;
+}
+
+message PackInfo {
+  string name = 1;
+  string vendor = 2;
+  string version = 3;
+  string path = 4;
+  repeated string supported_chips = 5;
+}
+
+message PackList {
+  repeated PackInfo packs = 1;
+}
+
+message SearchRequest {
+  string query = 1;
+}
+
+message PackSearchResult {
+  repeated PackInfo packs = 1;
+}
+
+message DownloadRequest {
+  string pack_url = 1;
+  string pack_name = 2;
+}
+
+message FlashRecord {
+  string firmware_path = 1;
+  string firmware_hash = 2;
+  string chip_name = 3;
+  string probe_name = 4;
+  int64 timestamp = 5;
+  bool success = 6;
+  int64 duration_ms = 7;
+  string error_message = 8;
+}
+
+message FlashHistoryList {
+  repeated FlashRecord records = 1;
+}

@@ -1,0 +1,6 @@
+pyocd>=0.36.0
+grpcio>=1.60.0
+grpcio-tools>=1.60.0
+protobuf>=4.25.0
+intelhex>=2.3.0
+pyelftools>=0.30.0
