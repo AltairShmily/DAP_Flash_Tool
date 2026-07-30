@@ -1,27 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'providers/theme_provider.dart';
+import 'theme/app_theme.dart';
+import 'pages/home_page.dart';
 
-class DapFlashApp extends StatelessWidget {
+class DapFlashApp extends ConsumerWidget {
   const DapFlashApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+
     return MaterialApp(
       title: 'DAP Flash Tool',
-      theme: ThemeData(
-        colorSchemeSeed: const Color(0xFF6750A4),
-        useMaterial3: true,
-        brightness: Brightness.light,
-      ),
-      darkTheme: ThemeData(
-        colorSchemeSeed: const Color(0xFF6750A4),
-        useMaterial3: true,
-        brightness: Brightness.dark,
-      ),
-      home: const Scaffold(
-        body: Center(
-          child: Text('DAP Flash Tool'),
-        ),
-      ),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: themeMode,
+      home: const HomePage(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
