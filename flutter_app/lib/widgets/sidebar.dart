@@ -33,7 +33,7 @@ class AppSidebar extends StatelessWidget {
         color: colorScheme.surfaceContainerHighest,
         border: Border(
           right: BorderSide(
-            color: colorScheme.outlineVariant.withOpacity(0.3),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.3),
           ),
         ),
       ),

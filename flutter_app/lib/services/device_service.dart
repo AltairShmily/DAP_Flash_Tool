@@ -1,4 +1,3 @@
-import 'package:grpc/grpc.dart';
 import '../proto/dap_flash.pb.dart';
 import '../proto/dap_flash.pbgrpc.dart';
 import 'grpc_client.dart';

@@ -39,7 +39,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     color: theme.colorScheme.surfaceContainerHighest,
                     border: Border(
                       bottom: BorderSide(
-                        color: theme.colorScheme.outlineVariant.withOpacity(0.3),
+                        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
                       ),
                     ),
                   ),
@@ -88,7 +88,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     color: theme.colorScheme.surfaceContainerHighest,
                     border: Border(
                       top: BorderSide(
-                        color: theme.colorScheme.outlineVariant.withOpacity(0.3),
+                        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
                       ),
                     ),
                   ),

@@ -12,7 +12,7 @@ class AppTheme {
         onSurface: AppColors.darkOnSurface,
         surfaceContainerHighest: AppColors.darkSurfaceContainer,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 1,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -31,7 +31,7 @@ class AppTheme {
         onSurface: AppColors.lightOnSurface,
         surfaceContainerHighest: AppColors.lightSurfaceContainer,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 1,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),

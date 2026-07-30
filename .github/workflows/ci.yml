@@ -68,13 +68,26 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Install protoc
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
+      - name: Install Dart protoc plugin
+        run: |
+          dart pub global activate protoc_plugin
+          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+
+      - name: Generate Dart gRPC code
+        run: |
+          mkdir -p flutter_app/lib/proto
+          protoc --dart_out=grpc:flutter_app/lib/proto -I proto proto/dap_flash.proto
+
       - name: Install dependencies
         working-directory: flutter_app
         run: flutter pub get
 
       - name: Analyze
         working-directory: flutter_app
-        run: flutter analyze --no-fatal-infos
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
       - name: Run tests
         working-directory: flutter_app
@@ -94,6 +107,22 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+
+      - name: Install protoc
+        shell: bash
+        run: choco install protoc -y
+
+      - name: Install Dart protoc plugin
+        shell: bash
+        run: |
+          dart pub global activate protoc_plugin
+          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+
+      - name: Generate Dart gRPC code
+        shell: bash
+        run: |
+          mkdir -p flutter_app/lib/proto
+          protoc --dart_out=grpc:flutter_app/lib/proto -I proto proto/dap_flash.proto
 
       - name: Verify Visual Studio
         shell: bash

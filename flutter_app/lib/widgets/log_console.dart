@@ -61,7 +61,7 @@ class LogConsole extends StatelessWidget {
                     text: '[$timeStr] ',
                     style: TextStyle(
                       color: _getColor(LogLevel.info, theme.brightness)
-                          .withOpacity(0.5),
+                          .withValues(alpha: 0.5),
                       fontFamily: 'monospace',
                       fontSize: 13,
                     ),
