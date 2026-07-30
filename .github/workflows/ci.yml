@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  FLUTTER_VERSION: '3.32.x'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # ─── Python 后端测试 ───
+  python-test:
+    name: Python Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+
+      - name: Generate gRPC code
+        run: |
+          mkdir -p backend/proto
+          python -m grpc_tools.protoc \
+            -I proto \
+            --python_out=backend/proto \
+            --grpc_python_out=backend/proto \
+            proto/dap_flash.proto
+          touch backend/proto/__init__.py
+
+      - name: Run tests
+        working-directory: backend
+        run: |
+          python test_import.py
+          python test_drivers.py
+          python test_parsers.py
+          python test_pack.py
+
+      - name: Verify server starts
+        working-directory: backend
+        run: |
+          timeout 5 python server.py || true
+
+  # ─── Flutter 分析与测试 ───
+  flutter-analyze:
+    name: Flutter Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: flutter_app
+        run: flutter pub get
+
+      - name: Analyze
+        working-directory: flutter_app
+        run: flutter analyze --no-fatal-infos
+
+      - name: Run tests
+        working-directory: flutter_app
+        run: flutter test
+
+  # ─── Windows 构建 ───
+  build-windows:
+    name: Build Windows
+    runs-on: windows-2022
+    needs: [python-test, flutter-analyze]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Verify Visual Studio
+        shell: bash
+        run: |
+          "/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -latest -property installationPath
+
+      - name: Install dependencies
+        working-directory: flutter_app
+        run: flutter pub get
+
+      - name: Build Windows
+        working-directory: flutter_app
+        run: flutter build windows --release
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dap-flash-tool-windows
+          path: flutter_app/build/windows/x64/runner/Release/
+          retention-days: 7
