@@ -95,6 +95,10 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Generate Windows platform files
+        working-directory: flutter_app
+        run: flutter create --platforms=windows .
+
       - name: Install protoc
         shell: bash
         run: choco install protoc -y
@@ -110,11 +114,6 @@ jobs:
         run: |
           mkdir -p flutter_app/lib/proto
           protoc --dart_out=grpc:flutter_app/lib/proto -I proto proto/dap_flash.proto
-
-      - name: Verify Visual Studio
-        shell: bash
-        run: |
-          "/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -latest -property installationPath
 
       - name: Install dependencies
         working-directory: flutter_app
