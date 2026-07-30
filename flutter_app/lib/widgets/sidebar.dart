@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum NavItem {
-  device(Icons.usb, 'Device'),
-  flash(Icons.flash_on, 'Flash'),
-  pack(Icons.inventory_2, 'Packs'),
-  history(Icons.history, 'History'),
-  settings(Icons.settings, 'Settings');
+  device(Icons.usb, 'Device', '设备'),
+  flash(Icons.flash_on, 'Flash', '烧录'),
+  pack(Icons.inventory_2, 'Packs', 'Pack'),
+  history(Icons.history, 'History', '历史'),
+  settings(Icons.settings, 'Settings', '设置');
 
   final IconData icon;
-  final String label;
-  const NavItem(this.icon, this.label);
+  final String labelEn;
+  final String labelZh;
+  const NavItem(this.icon, this.labelEn, this.labelZh);
+
+  String labelFor(String languageCode) {
+    return languageCode == 'zh' ? labelZh : labelEn;
+  }
 }
 
-class AppSidebar extends StatelessWidget {
+class AppSidebar extends ConsumerWidget {
   final NavItem selectedItem;
   final ValueChanged<NavItem> onItemSelected;
 
@@ -23,9 +30,10 @@ class AppSidebar extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final locale = Localizations.localeOf(context);
 
     return Container(
       width: 72,
@@ -42,6 +50,7 @@ class AppSidebar extends StatelessWidget {
           const SizedBox(height: 16),
           ...NavItem.values.map((item) {
             final isSelected = item == selectedItem;
+            final label = item.labelFor(locale.languageCode);
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
               child: Material(
@@ -67,7 +76,7 @@ class AppSidebar extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          item.label,
+                          label,
                           style: TextStyle(
                             fontSize: 10,
                             color: isSelected

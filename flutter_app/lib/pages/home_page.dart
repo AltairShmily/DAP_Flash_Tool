@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/theme_provider.dart';
+import '../providers/locale_provider.dart';
+import '../l10n/app_strings.dart';
 import '../widgets/sidebar.dart';
 import '../widgets/collapsible_card.dart';
+import 'pack_page.dart';
+import 'settings_page.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -18,6 +22,8 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final themeMode = ref.watch(themeModeProvider);
+    final locale = ref.watch(localeProvider);
+    final strings = AppStrings(locale);
 
     return Scaffold(
       body: Row(
@@ -48,10 +54,28 @@ class _HomePageState extends ConsumerState<HomePage> {
                       Icon(Icons.usb, color: theme.colorScheme.primary),
                       const SizedBox(width: 8),
                       Text(
-                        'DAP Flash Tool',
+                        strings.appTitle,
                         style: theme.textTheme.titleMedium,
                       ),
                       const Spacer(),
+                      // Language toggle
+                      IconButton(
+                        icon: Text(
+                          locale.languageCode == 'zh' ? '中' : 'EN',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                        tooltip: locale.languageCode == 'zh' ? 'Switch to English' : '切换到中文',
+                        onPressed: () {
+                          ref.read(localeProvider.notifier).setLocale(
+                            locale.languageCode == 'zh'
+                                ? const Locale('en')
+                                : const Locale('zh'),
+                          );
+                        },
+                      ),
                       // Theme toggle
                       IconButton(
                         icon: Icon(
@@ -78,7 +102,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
                 // Main content
                 Expanded(
-                  child: _buildContent(),
+                  child: _buildContent(strings),
                 ),
                 // Status bar
                 Container(
@@ -95,7 +119,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   child: Row(
                     children: [
                       Text(
-                        'Status: Ready',
+                        strings.statusReady,
                         style: theme.textTheme.bodySmall,
                       ),
                       const Spacer(),
@@ -114,48 +138,48 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(AppStrings strings) {
     switch (_selectedNav) {
       case NavItem.device:
-        return _buildDevicePage();
+        return _buildDevicePage(strings);
       case NavItem.flash:
-        return _buildFlashPage();
+        return _buildFlashPage(strings);
       case NavItem.pack:
-        return _buildPackPage();
+        return _buildPackPage(strings);
       case NavItem.history:
-        return _buildHistoryPage();
+        return _buildHistoryPage(strings);
       case NavItem.settings:
-        return _buildSettingsPage();
+        return _buildSettingsPage(strings);
     }
   }
 
-  Widget _buildFlashPage() {
+  Widget _buildFlashPage(AppStrings strings) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           CollapsibleCard(
-            title: 'Connection',
+            title: strings.connection,
             icon: Icons.usb,
-            subtitle: 'No device connected',
+            subtitle: strings.noDeviceConnected,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Device connection settings will go here'),
+                Text(strings.deviceConnSettings),
                 const SizedBox(height: 8),
                 ElevatedButton.icon(
                   onPressed: () {},
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Refresh Devices'),
+                  label: Text(strings.refreshDevices),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 8),
           CollapsibleCard(
-            title: 'Flash Operation',
+            title: strings.flashOperation,
             icon: Icons.flash_on,
-            subtitle: 'Ready',
+            subtitle: strings.ready,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -165,7 +189,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       child: OutlinedButton.icon(
                         onPressed: () {},
                         icon: const Icon(Icons.folder_open),
-                        label: const Text('Select Firmware...'),
+                        label: Text(strings.selectFirmware),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -177,9 +201,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          labelText: 'Target Chip',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: strings.targetChip,
+                          border: const OutlineInputBorder(),
                         ),
                         items: const [],
                         onChanged: (v) {},
@@ -191,9 +215,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Start Address',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: strings.startAddress,
+                    border: const OutlineInputBorder(),
                     prefixText: '0x',
                   ),
                   initialValue: '08000000',
@@ -205,7 +229,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       child: FilledButton.icon(
                         onPressed: () {},
                         icon: const Icon(Icons.download),
-                        label: const Text('Flash'),
+                        label: Text(strings.flashBtn),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -213,7 +237,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       child: OutlinedButton.icon(
                         onPressed: () {},
                         icon: const Icon(Icons.delete_outline),
-                        label: const Text('Erase'),
+                        label: Text(strings.eraseBtn),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -221,7 +245,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       child: OutlinedButton.icon(
                         onPressed: () {},
                         icon: const Icon(Icons.restart_alt),
-                        label: const Text('Reset'),
+                        label: Text(strings.resetBtn),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -229,7 +253,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       child: OutlinedButton.icon(
                         onPressed: () {},
                         icon: const Icon(Icons.info_outline),
-                        label: const Text('Chip ID'),
+                        label: Text(strings.chipIdBtn),
                       ),
                     ),
                   ],
@@ -239,7 +263,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           ),
           const SizedBox(height: 8),
           CollapsibleCard(
-            title: 'Output Log',
+            title: strings.outputLog,
             icon: Icons.terminal,
             initiallyExpanded: true,
             child: Container(
@@ -249,9 +273,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               padding: const EdgeInsets.all(8),
-              child: const Text(
-                '[14:23:01] Ready\n[14:23:02] Waiting for operation...',
-                style: TextStyle(
+              child: Text(
+                strings.logReady,
+                style: const TextStyle(
                   color: Colors.greenAccent,
                   fontFamily: 'monospace',
                 ),
@@ -263,19 +287,19 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildDevicePage() {
-    return const Center(child: Text('Device Page - Coming Soon'));
+  Widget _buildDevicePage(AppStrings strings) {
+    return Center(child: Text(strings.devicePage));
   }
 
-  Widget _buildPackPage() {
-    return const Center(child: Text('Pack Management - Coming Soon'));
+  Widget _buildPackPage(AppStrings strings) {
+    return const PackPage();
   }
 
-  Widget _buildHistoryPage() {
-    return const Center(child: Text('Flash History - Coming Soon'));
+  Widget _buildHistoryPage(AppStrings strings) {
+    return Center(child: Text(strings.historyPage));
   }
 
-  Widget _buildSettingsPage() {
-    return const Center(child: Text('Settings - Coming Soon'));
+  Widget _buildSettingsPage(AppStrings strings) {
+    return const SettingsPage();
   }
 }
