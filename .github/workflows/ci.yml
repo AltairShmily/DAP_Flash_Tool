@@ -38,6 +38,8 @@ jobs:
             --grpc_python_out=backend/proto \
             proto/dap_flash.proto
           touch backend/proto/__init__.py
+          # Fix relative import in generated gRPC code
+          sed -i 's/^import dap_flash_pb2/from . import dap_flash_pb2/' backend/proto/dap_flash_pb2_grpc.py
 
       - name: Run tests
         working-directory: backend
