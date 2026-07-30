@@ -51,12 +51,55 @@ class AppStrings {
       'disconnect': 'Disconnect',
       'deviceConnected': 'Device Connected',
       // Home page placeholders
-      'devicePage': 'Device Page - Coming Soon',
+      'devicePage': 'Device Management',
       'packPage': 'Pack Management - Coming Soon',
-      'historyPage': 'Flash History - Coming Soon',
+      'historyPage': 'Flash History',
       'settingsPage': 'Settings - Coming Soon',
-      'deviceConnSettings': 'Device connection settings will go here',
-      'logReady': '[14:23:01] Ready\n[14:23:02] Waiting for operation...',
+      'deviceConnSettings': 'Connection parameters',
+      'logReady': 'Ready — waiting for operation...',
+      // Device page
+      'probeList': 'Probe List',
+      'noProbesFound': 'No probes found',
+      'connectProbe': 'Connect',
+      'disconnectProbe': 'Disconnect',
+      'connectionParams': 'Connection Parameters',
+      'protocol': 'Protocol',
+      'frequency': 'Frequency',
+      'connectedDeviceInfo': 'Connected Device',
+      'scanning': 'Scanning...',
+      'probeId': 'Probe ID',
+      'probeVendor': 'Vendor',
+      'probeSerial': 'Serial',
+      'connectFirst': 'Please connect a device first',
+      'connectionFailed': 'Connection failed',
+      'connectedSuccessfully': 'Connected successfully',
+      'disconnected': 'Disconnected',
+      'probeScanned': 'probes found',
+      'noProbeSelected': 'No probe selected',
+      // History page
+      'noHistory': 'No flash history',
+      'noHistoryHint': 'Flash records will appear here after firmware operations',
+      'reflash': 'Re-flash',
+      'flashSuccess': 'Success',
+      'flashFailed': 'Failed',
+      'clearHistoryBtn': 'Clear All',
+      'duration': 'Duration',
+      'chipName': 'Chip',
+      'firmwareFile': 'Firmware',
+      // Log / status
+      'logFlashing': 'Flashing firmware...',
+      'logErasing': 'Erasing chip...',
+      'logReset': 'Target reset',
+      'logChipId': 'Chip ID',
+      'logConnecting': 'Connecting...',
+      'logProgramming': 'Programming...',
+      'logVerifying': 'Verifying...',
+      'logComplete': 'Operation complete',
+      'logError': 'Error',
+      'statusConnected': 'Status: Connected',
+      'statusFlashing': 'Status: Flashing',
+      'statusErasing': 'Status: Erasing',
+      'selectChipFirst': 'Please select a target chip',
       // Pack page
       'searchPacksOrChips': 'Search packs or chips...',
       'importPack': 'Import Pack',
@@ -86,6 +129,35 @@ class AppStrings {
       'scanDirNotConnected': 'Scan directories — gRPC not yet connected',
       'importNotConnected': 'Import pack — gRPC not yet connected',
       'refreshNotConnected': 'Refresh — gRPC not yet connected',
+      'advanced': 'Advanced',
+      'targetPower': 'Target Power',
+      'targetPowerOn': 'Power On',
+      'targetPowerOff': 'Power Off',
+      'searchHistory': 'Search history...',
+      'undo': 'Undo',
+      'recordDeleted': 'Record deleted',
+      'speed': 'Speed',
+      'bytesWritten': 'Bytes written',
+      'chipErase': 'Chip Erase',
+      'sectorErase': 'Sector Erase',
+      'startFlash': 'Start Flash',
+      'eraseChip': 'Erase Chip',
+      'notConnected': 'Not connected',
+      'flashProgress': 'Flash Progress',
+      'noResults': 'No results',
+      'flashResult': 'Flash Result',
+      'operationSuccess': 'Operation Successful',
+      'operationFailed': 'Operation Failed',
+      'close': 'Close',
+      'address': 'Address',
+      'clearLog': 'Clear Log',
+      'connectionStatus': 'Connection Status',
+      'eraseMode': 'Erase Mode',
+      'firmwarePathHint': 'Select or enter firmware path',
+      'inProgress': 'In Progress...',
+      'loadPack': 'Load Pack',
+      'operation': 'Operation',
+      'speedTest': 'Speed Test',
     },
     'zh': {
       'appTitle': 'DAP 烧录工具',
@@ -128,12 +200,55 @@ class AppStrings {
       'disconnect': '断开连接',
       'deviceConnected': '设备已连接',
       // Home page placeholders
-      'devicePage': '设备页 - 即将推出',
+      'devicePage': '设备管理',
       'packPage': 'Pack 管理 - 即将推出',
-      'historyPage': '烧录历史 - 即将推出',
+      'historyPage': '烧录历史',
       'settingsPage': '设置 - 即将推出',
-      'deviceConnSettings': '设备连接设置将在此处显示',
-      'logReady': '[14:23:01] 就绪\n[14:23:02] 等待操作...',
+      'deviceConnSettings': '连接参数',
+      'logReady': '就绪 — 等待操作...',
+      // Device page
+      'probeList': '探针列表',
+      'noProbesFound': '未找到探针',
+      'connectProbe': '连接',
+      'disconnectProbe': '断开',
+      'connectionParams': '连接参数',
+      'protocol': '协议',
+      'frequency': '频率',
+      'connectedDeviceInfo': '已连接设备',
+      'scanning': '扫描中...',
+      'probeId': '探针 ID',
+      'probeVendor': '厂商',
+      'probeSerial': '序列号',
+      'connectFirst': '请先连接设备',
+      'connectionFailed': '连接失败',
+      'connectedSuccessfully': '连接成功',
+      'disconnected': '已断开',
+      'probeScanned': '个探针已发现',
+      'noProbeSelected': '未选择探针',
+      // History page
+      'noHistory': '暂无烧录历史',
+      'noHistoryHint': '烧录记录将在固件操作后显示在此处',
+      'reflash': '重新烧录',
+      'flashSuccess': '成功',
+      'flashFailed': '失败',
+      'clearHistoryBtn': '清除全部',
+      'duration': '耗时',
+      'chipName': '芯片',
+      'firmwareFile': '固件',
+      // Log / status
+      'logFlashing': '烧录固件中...',
+      'logErasing': '擦除芯片中...',
+      'logReset': '目标已复位',
+      'logChipId': '芯片 ID',
+      'logConnecting': '连接中...',
+      'logProgramming': '编程中...',
+      'logVerifying': '验证中...',
+      'logComplete': '操作完成',
+      'logError': '错误',
+      'statusConnected': '状态: 已连接',
+      'statusFlashing': '状态: 烧录中',
+      'statusErasing': '状态: 擦除中',
+      'selectChipFirst': '请选择目标芯片',
       // Pack page
       'searchPacksOrChips': '搜索 Pack 或芯片...',
       'importPack': '导入 Pack',
@@ -163,6 +278,35 @@ class AppStrings {
       'scanDirNotConnected': '扫描目录 — gRPC 尚未连接',
       'importNotConnected': '导入 Pack — gRPC 尚未连接',
       'refreshNotConnected': '刷新 — gRPC 尚未连接',
+      'advanced': '高级',
+      'targetPower': '目标电源',
+      'targetPowerOn': '供电',
+      'targetPowerOff': '断电',
+      'searchHistory': '搜索历史...',
+      'undo': '撤销',
+      'recordDeleted': '记录已删除',
+      'speed': '速度',
+      'bytesWritten': '已写入字节',
+      'chipErase': '整片擦除',
+      'sectorErase': '扇区擦除',
+      'startFlash': '开始烧录',
+      'eraseChip': '擦除芯片',
+      'notConnected': '未连接',
+      'flashProgress': '烧录进度',
+      'noResults': '无结果',
+      'flashResult': '烧录结果',
+      'operationSuccess': '操作成功',
+      'operationFailed': '操作失败',
+      'close': '关闭',
+      'address': '地址',
+      'clearLog': '清除日志',
+      'connectionStatus': '连接状态',
+      'eraseMode': '擦除模式',
+      'firmwarePathHint': '选择或输入固件路径',
+      'inProgress': '进行中...',
+      'loadPack': '加载 Pack',
+      'operation': '操作',
+      'speedTest': '速度测试',
     },
   };
 
@@ -245,6 +389,66 @@ class AppStrings {
   String get scanDirNotConnected => _t('scanDirNotConnected');
   String get importNotConnected => _t('importNotConnected');
   String get refreshNotConnected => _t('refreshNotConnected');
+  String get advanced => _t('advanced');
+  String get targetPower => _t('targetPower');
+  String get targetPowerOn => _t('targetPowerOn');
+  String get targetPowerOff => _t('targetPowerOff');
+  String get searchHistory => _t('searchHistory');
+  String get undo => _t('undo');
+  String get recordDeleted => _t('recordDeleted');
+  String get speed => _t('speed');
+  String get bytesWritten => _t('bytesWritten');
+  String get chipErase => _t('chipErase');
+  String get sectorErase => _t('sectorErase');
+  String get startFlash => _t('startFlash');
+  String get eraseChip => _t('eraseChip');
+  String get notConnected => _t('notConnected');
+  String get flashProgress => _t('flashProgress');
+  String get noResults => _t('noResults');
+  String get flashResult => _t('flashResult');
+  String get operationSuccess => _t('operationSuccess');
+  String get operationFailed => _t('operationFailed');
+  String get close => _t('close');
+  String get probeList => _t('probeList');
+  String get noProbesFound => _t('noProbesFound');
+  String get connectProbe => _t('connectProbe');
+  String get disconnectProbe => _t('disconnectProbe');
+  String get connectionParams => _t('connectionParams');
+  String get protocol => _t('protocol');
+  String get frequency => _t('frequency');
+  String get connectedDeviceInfo => _t('connectedDeviceInfo');
+  String get scanning => _t('scanning');
+  String get probeId => _t('probeId');
+  String get probeVendor => _t('probeVendor');
+  String get probeSerial => _t('probeSerial');
+  String get connectFirst => _t('connectFirst');
+  String get connectionFailed => _t('connectionFailed');
+  String get connectedSuccessfully => _t('connectedSuccessfully');
+  String get disconnected => _t('disconnected');
+  String get probeScanned => _t('probeScanned');
+  String get noProbeSelected => _t('noProbeSelected');
+  String get noHistory => _t('noHistory');
+  String get noHistoryHint => _t('noHistoryHint');
+  String get reflash => _t('reflash');
+  String get flashSuccess => _t('flashSuccess');
+  String get flashFailed => _t('flashFailed');
+  String get clearHistoryBtn => _t('clearHistoryBtn');
+  String get duration => _t('duration');
+  String get chipName => _t('chipName');
+  String get firmwareFile => _t('firmwareFile');
+  String get logFlashing => _t('logFlashing');
+  String get logErasing => _t('logErasing');
+  String get logReset => _t('logReset');
+  String get logChipId => _t('logChipId');
+  String get logConnecting => _t('logConnecting');
+  String get logProgramming => _t('logProgramming');
+  String get logVerifying => _t('logVerifying');
+  String get logComplete => _t('logComplete');
+  String get logError => _t('logError');
+  String get statusConnected => _t('statusConnected');
+  String get statusFlashing => _t('statusFlashing');
+  String get statusErasing => _t('statusErasing');
+  String get selectChipFirst => _t('selectChipFirst');
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppStrings> {
