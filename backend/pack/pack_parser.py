@@ -22,10 +22,22 @@ def parse_pack(pack_path: str) -> PackInfo:
         pack_version = root.get('version', '0.0.0')
 
         # Extract chip definitions
+        # In CMSIS packs, devices can be nested: <device family="X"><device name="Y">
+        # or directly under <devices>. We look for all <device> elements with a 'name' attribute.
+        # Build parent map for looking up family attribute from parent device.
+        parent_map = {c: p for p in root.iter() for c in p}
         chips = []
-        for device in root.findall('.//devices/device/family/device'):
+        for device in root.findall('.//devices//device'):
             chip_name = device.get('name', '')
+            if not chip_name:
+                continue  # Skip family-level grouping elements
             chip_vendor = device.get('Dvendor', pack_vendor)
+            # Family: from this element, or from parent device element
+            chip_family = device.get('family', '')
+            if not chip_family:
+                parent = parent_map.get(device)
+                if parent is not None:
+                    chip_family = parent.get('family', '')
 
             # Extract flash info
             memory = device.find('.//memory[@name="Flash"]')
@@ -48,7 +60,7 @@ def parse_pack(pack_path: str) -> PackInfo:
             chips.append(ChipDefinition(
                 name=chip_name,
                 vendor=chip_vendor,
-                family=root.get('name', ''),
+                family=chip_family,
                 flash_base=flash_start,
                 flash_size=flash_size,
                 ram_base=ram_start,
