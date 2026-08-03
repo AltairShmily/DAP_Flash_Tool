@@ -68,6 +68,17 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Install protoc Dart plugin
+        run: dart pub global activate protoc_plugin
+
+      - name: Generate Dart proto stubs
+        run: |
+          export PATH="$PATH:$HOME/.pub-cache/bin"
+          protoc \
+            --proto_path=proto \
+            --dart_out=grpc:flutter_app/lib/proto \
+            proto/dap_flash.proto
+
       - name: Install dependencies
         working-directory: flutter_app
         run: flutter pub get
@@ -94,6 +105,23 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+
+      - name: Install protoc
+        shell: bash
+        run: choco install protoc -y
+
+      - name: Install protoc Dart plugin
+        shell: bash
+        run: dart pub global activate protoc_plugin
+
+      - name: Generate Dart proto stubs
+        shell: bash
+        run: |
+          export PATH="$PATH:$USERPROFILE/AppData/Local/Pub/Cache/bin"
+          protoc \
+            --proto_path=proto \
+            --dart_out=grpc:flutter_app/lib/proto \
+            proto/dap_flash.proto
 
       - name: Generate Windows platform files
         shell: bash
