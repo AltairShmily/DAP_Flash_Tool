@@ -96,6 +96,10 @@ class DeviceNotifier extends StateNotifier<DeviceState> {
     state = state.copyWith(protocol: proto);
   }
 
+  void setTargetName(String name) {
+    state = state.copyWith(targetName: name);
+  }
+
   void selectProbe(String probeId) {
     state = state.copyWith(selectedProbeId: probeId);
   }

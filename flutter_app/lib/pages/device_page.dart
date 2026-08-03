@@ -15,6 +15,26 @@ class DevicePage extends ConsumerStatefulWidget {
 class _DevicePageState extends ConsumerState<DevicePage> {
   bool _showAdvanced = false;
   bool _targetPower = false;
+  late TextEditingController _targetController;
+
+  @override
+  void initState() {
+    super.initState();
+    final initialTarget = ref.read(deviceProvider).targetName ?? 'STM32F103C8';
+    _targetController = TextEditingController(text: initialTarget);
+    // Sync controller when targetName changes in state (e.g. after successful connection)
+    ref.listenManual(deviceProvider, (prev, next) {
+      if (prev?.targetName != next.targetName && next.targetName != null) {
+        _targetController.text = next.targetName!;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _targetController.dispose();
+    super.dispose();
+  }
 
   String _freqLabel(int freq) {
     switch (freq) {
@@ -293,13 +313,16 @@ class _DevicePageState extends ConsumerState<DevicePage> {
                 // MCU target name
                 TextFormField(
                   enabled: !deviceState.isConnected,
+                  controller: _targetController,
                   decoration: InputDecoration(
                     labelText: strings.targetChip,
                     border: const OutlineInputBorder(),
                     isDense: true,
                     hintText: 'STM32F103C8',
                   ),
-                  initialValue: deviceState.targetName ?? 'STM32F103C8',
+                  onChanged: (v) {
+                    ref.read(deviceProvider.notifier).setTargetName(v);
+                  },
                 ),
                 const SizedBox(height: 16),
 
@@ -329,7 +352,9 @@ class _DevicePageState extends ConsumerState<DevicePage> {
                                   ? null
                                   : () async {
                                       final probeId = deviceState.selectedProbeId!;
-                                      final target = deviceState.targetName ?? 'STM32F103C8';
+                                      final target = _targetController.text.isNotEmpty
+                                          ? _targetController.text
+                                          : 'STM32F103C8';
                                       ref.read(logProvider.notifier).info(
                                           'Connecting to $probeId ($target)...');
                                       final success = await ref
