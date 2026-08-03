@@ -13,8 +13,6 @@ class Probe extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   Probe() : super();
-  Probe.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  Probe.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -52,8 +50,6 @@ class ProbeList extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   ProbeList() : super();
-  ProbeList.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  ProbeList.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -76,8 +72,6 @@ class ConnectRequest extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   ConnectRequest() : super();
-  ConnectRequest.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  ConnectRequest.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -117,8 +111,6 @@ class ConnectResponse extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   ConnectResponse() : super();
-  ConnectResponse.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  ConnectResponse.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -161,8 +153,6 @@ class ProgressUpdate extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   ProgressUpdate() : super();
-  ProgressUpdate.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  ProgressUpdate.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -206,8 +196,6 @@ class OperationResult extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   OperationResult() : super();
-  OperationResult.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  OperationResult.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -236,8 +224,6 @@ class ChipIdResult extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   ChipIdResult() : super();
-  ChipIdResult.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  ChipIdResult.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -265,8 +251,6 @@ class EraseRequest extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   EraseRequest() : super();
-  EraseRequest.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  EraseRequest.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -291,8 +275,6 @@ class FlashRequest extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   FlashRequest() : super();
-  FlashRequest.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  FlashRequest.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -329,8 +311,6 @@ class PackInfo extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   PackInfo() : super();
-  PackInfo.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  PackInfo.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -370,8 +350,6 @@ class PackList extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   PackList() : super();
-  PackList.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  PackList.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -391,8 +369,6 @@ class SearchRequest extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   SearchRequest() : super();
-  SearchRequest.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  SearchRequest.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -415,8 +391,6 @@ class PackSearchResult extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   PackSearchResult() : super();
-  PackSearchResult.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  PackSearchResult.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -437,8 +411,6 @@ class DownloadRequest extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   DownloadRequest() : super();
-  DownloadRequest.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  DownloadRequest.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -473,8 +445,6 @@ class FlashRecordProto extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   FlashRecordProto() : super();
-  FlashRecordProto.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  FlashRecordProto.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -509,8 +479,6 @@ class FlashHistoryList extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   FlashHistoryList() : super();
-  FlashHistoryList.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  FlashHistoryList.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -529,7 +497,6 @@ class ListProbesRequest extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   ListProbesRequest() : super();
-  ListProbesRequest.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -546,7 +513,6 @@ class DisconnectProbeRequest extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   DisconnectProbeRequest() : super();
-  DisconnectProbeRequest.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -563,7 +529,6 @@ class ResetTargetRequest extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   ResetTargetRequest() : super();
-  ResetTargetRequest.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -580,7 +545,6 @@ class ReadChipIdRequest extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   ReadChipIdRequest() : super();
-  ReadChipIdRequest.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -597,8 +561,6 @@ class DisconnectProbeResponse extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   DisconnectProbeResponse() : super();
-  DisconnectProbeResponse.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  DisconnectProbeResponse.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -615,8 +577,6 @@ class ListPacksRequest extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   ListPacksRequest() : super();
-  ListPacksRequest.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  ListPacksRequest.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
@@ -633,8 +593,6 @@ class GetFlashHistoryRequest extends GeneratedMessage {
     ..hasRequiredFields = false;
 
   GetFlashHistoryRequest() : super();
-  GetFlashHistoryRequest.fromBuffer(List<int> i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromBuffer(i, r);
-  GetFlashHistoryRequest.fromJson(String i, [ExtensionRegistry r = ExtensionRegistry.EMPTY]) : super.fromJson(i, r);
 
   @override
   BuilderInfo get info_ => _i;
