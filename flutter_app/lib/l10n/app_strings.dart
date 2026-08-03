@@ -158,6 +158,7 @@ class AppStrings {
       'loadPack': 'Load Pack',
       'operation': 'Operation',
       'speedTest': 'Speed Test',
+      'flashPage': 'Flash',
     },
     'zh': {
       'appTitle': 'DAP 烧录工具',
@@ -307,6 +308,7 @@ class AppStrings {
       'loadPack': '加载 Pack',
       'operation': '操作',
       'speedTest': '速度测试',
+      'flashPage': '烧录',
     },
   };
 
@@ -409,6 +411,16 @@ class AppStrings {
   String get operationSuccess => _t('operationSuccess');
   String get operationFailed => _t('operationFailed');
   String get close => _t('close');
+  String get clearLog => _t('clearLog');
+  String get connectionStatus => _t('connectionStatus');
+  String get operation => _t('operation');
+  String get firmwarePathHint => _t('firmwarePathHint');
+  String get loadPack => _t('loadPack');
+  String get address => _t('address');
+  String get eraseMode => _t('eraseMode');
+  String get inProgress => _t('inProgress');
+  String get speedTest => _t('speedTest');
+  String get flashPage => _t('flashPage');
   String get probeList => _t('probeList');
   String get noProbesFound => _t('noProbesFound');
   String get connectProbe => _t('connectProbe');

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_strings.dart';
 import '../providers/history_provider.dart';
-import '../providers/device_provider.dart';
-import '../providers/flash_provider.dart';
 
 class HistoryPage extends ConsumerStatefulWidget {
   final void Function(String firmwarePath)? onReFlash;
@@ -157,8 +155,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
       ),
       confirmDismiss: (direction) async {
         final index = allRecords.indexOf(record);
-        ref.read(historyProvider.notifier).state = List.from(allRecords)
-          ..removeAt(index);
+        ref.read(historyProvider.notifier).removeRecordAt(index);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -167,10 +164,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
               action: SnackBarAction(
                 label: strings.undo,
                 onPressed: () {
-                  final newList = List<FlashRecord>.from(
-                      ref.read(historyProvider));
-                  newList.insert(index, record);
-                  ref.read(historyProvider.notifier).state = newList;
+                  ref.read(historyProvider.notifier).insertRecord(index, record);
                 },
               ),
             ),
@@ -221,7 +215,7 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        record.success ? strings.success : strings.errorLabel,
+                        record.success ? strings.flashSuccess : strings.flashFailed,
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: record.success ? Colors.green : cs.error,
                           fontWeight: FontWeight.w600,

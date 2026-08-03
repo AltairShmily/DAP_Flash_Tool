@@ -175,7 +175,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final strings = AppStrings.of(context);
     final locale = Localizations.localeOf(context);
     final stringsForLocale = AppStrings(locale);
     final flashState = ref.watch(flashProvider);

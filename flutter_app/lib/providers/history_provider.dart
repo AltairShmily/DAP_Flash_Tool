@@ -93,6 +93,23 @@ class HistoryNotifier extends StateNotifier<List<FlashRecord>> {
     state = [];
     _save();
   }
+
+  void removeRecordAt(int index) {
+    state = List.from(state)..removeAt(index);
+    _save();
+  }
+
+  void insertRecord(int index, FlashRecord record) {
+    final newList = List<FlashRecord>.from(state);
+    newList.insert(index, record);
+    state = newList;
+    _save();
+  }
+
+  void replaceRecords(List<FlashRecord> records) {
+    state = records;
+    _save();
+  }
 }
 
 final historyProvider =
