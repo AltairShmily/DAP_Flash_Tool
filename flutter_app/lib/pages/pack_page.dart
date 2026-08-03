@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_strings.dart';
+import '../proto/dap_flash.pb.dart';
 import '../providers/pack_provider.dart';
 import '../widgets/collapsible_card.dart';
 
@@ -14,50 +16,25 @@ class PackPage extends ConsumerStatefulWidget {
 class _PackPageState extends ConsumerState<PackPage> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
-
-  // TODO: Replace with real pack data model once gRPC proto is generated for Dart
-  final List<_MockPackInfo> _mockPacks = [
-    _MockPackInfo(
-      name: 'STM32F1xx_DFP',
-      vendor: 'Keil.STM32F1xx_DFP',
-      version: '2.4.1',
-      description: 'STM32F1xx Device Family Pack',
-      chips: ['STM32F103C8', 'STM32F103CB', 'STM32F103R8', 'STM32F103RB', 'STM32F103RC', 'STM32F103RE'],
-      path: '/packs/Keil.STM32F1xx_DFP.2.4.1.pack',
-    ),
-    _MockPackInfo(
-      name: 'STM32F4xx_DFP',
-      vendor: 'Keil.STM32F4xx_DFP',
-      version: '2.17.0',
-      description: 'STM32F4xx Device Family Pack',
-      chips: ['STM32F407VG', 'STM32F407VE', 'STM32F429ZI', 'STM32F446RE'],
-      path: '/packs/Keil.STM32F4xx_DFP.2.17.0.pack',
-    ),
-    _MockPackInfo(
-      name: 'nRF528xx_DFP',
-      vendor: 'NordicSemiconductor.nRF52_DFP',
-      version: '8.42.1',
-      description: 'nRF52 Series Device Family Pack',
-      chips: ['nRF52832', 'nRF52840'],
-      path: '/packs/NordicSemiconductor.nRF52_DFP.8.42.1.pack',
-    ),
-  ];
+  Timer? _debounce;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
-  List<_MockPackInfo> get _filteredPacks {
-    if (_searchQuery.isEmpty) return _mockPacks;
-    final q = _searchQuery.toLowerCase();
-    return _mockPacks.where((pack) {
-      return pack.name.toLowerCase().contains(q) ||
-          pack.vendor.toLowerCase().contains(q) ||
-          pack.description.toLowerCase().contains(q) ||
-          pack.chips.any((c) => c.toLowerCase().contains(q));
-    }).toList();
+  void _onSearchChanged(String query) {
+    setState(() => _searchQuery = query);
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (query.isNotEmpty) {
+        ref.read(packProvider.notifier).searchPacks(query);
+      } else {
+        ref.read(packProvider.notifier).clearSearch();
+      }
+    });
   }
 
   @override
@@ -65,6 +42,11 @@ class _PackPageState extends ConsumerState<PackPage> {
     final theme = Theme.of(context);
     final packState = ref.watch(packProvider);
     final strings = AppStrings.of(context);
+
+    // Determine which list to display
+    final bool showSearchResults = _searchQuery.isNotEmpty;
+    final List<PackInfo> displayPacks =
+        showSearchResults ? packState.searchResults : packState.packs;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -75,7 +57,7 @@ class _PackPageState extends ConsumerState<PackPage> {
           CollapsibleCard(
             title: strings.packManagement,
             icon: Icons.inventory_2,
-            subtitle: '${_mockPacks.length} ${strings.packsLoaded}',
+            subtitle: '${packState.packs.length} ${strings.packsLoaded}',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -90,14 +72,14 @@ class _PackPageState extends ConsumerState<PackPage> {
                             icon: const Icon(Icons.clear),
                             onPressed: () {
                               _searchController.clear();
-                              setState(() => _searchQuery = '');
+                              _onSearchChanged('');
                             },
                           )
                         : null,
                     border: const OutlineInputBorder(),
                     isDense: true,
                   ),
-                  onChanged: (v) => setState(() => _searchQuery = v),
+                  onChanged: _onSearchChanged,
                 ),
                 const SizedBox(height: 12),
                 // Action buttons
@@ -106,9 +88,7 @@ class _PackPageState extends ConsumerState<PackPage> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(strings.scanDirNotConnected)),
-                          );
+                          ref.read(packProvider.notifier).loadPacks();
                         },
                         icon: const Icon(Icons.folder_open),
                         label: Text(strings.scanDirectory),
@@ -129,9 +109,7 @@ class _PackPageState extends ConsumerState<PackPage> {
                     const SizedBox(width: 8),
                     IconButton.filledTonal(
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(strings.refreshNotConnected)),
-                        );
+                        ref.read(packProvider.notifier).loadPacks();
                       },
                       icon: const Icon(Icons.refresh),
                       tooltip: strings.refresh,
@@ -143,15 +121,69 @@ class _PackPageState extends ConsumerState<PackPage> {
           ),
           const SizedBox(height: 8),
 
+          // ── Download Progress ──
+          if (packState.isDownloading) ...[
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          '${strings.inProgress} ${(packState.downloadProgress * 100).toStringAsFixed(1)}%',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    LinearProgressIndicator(value: packState.downloadProgress),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+
+          // ── Error Message ──
+          if (packState.errorMessage != null) ...[
+            Card(
+              color: theme.colorScheme.errorContainer,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Icon(Icons.error_outline, color: theme.colorScheme.error),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        packState.errorMessage!,
+                        style: TextStyle(color: theme.colorScheme.onErrorContainer),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+
           // ── Pack List ──
-          if (packState.isLoading)
+          if (packState.isLoading || packState.isSearching)
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(32),
                 child: CircularProgressIndicator(),
               ),
             )
-          else if (_filteredPacks.isEmpty)
+          else if (displayPacks.isEmpty)
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(32),
@@ -160,12 +192,12 @@ class _PackPageState extends ConsumerState<PackPage> {
                     Icon(Icons.inventory_2_outlined, size: 48, color: theme.colorScheme.outline),
                     const SizedBox(height: 8),
                     Text(
-                      _searchQuery.isEmpty ? strings.noPacksInstalled : strings.noPacksMatchSearch,
+                      showSearchResults ? strings.noPacksMatchSearch : strings.noPacksInstalled,
                       style: theme.textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _searchQuery.isEmpty ? strings.scanOrImportHint : strings.tryDifferentSearch,
+                      showSearchResults ? strings.tryDifferentSearch : strings.scanOrImportHint,
                       style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
                     ),
                   ],
@@ -173,16 +205,23 @@ class _PackPageState extends ConsumerState<PackPage> {
               ),
             )
           else
-            ...List.generate(_filteredPacks.length, (i) {
-              final pack = _filteredPacks[i];
+            ...List.generate(displayPacks.length, (i) {
+              final pack = displayPacks[i];
+              final isInstalled = packState.packs.any(
+                (p) => p.name == pack.name && p.version == pack.version,
+              );
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: _PackCard(
                   pack: pack,
                   isSelected: packState.selectedPack == pack.name,
+                  isInstalled: isInstalled,
+                  isSearchResult: showSearchResults,
                   onSelect: () {
                     ref.read(packProvider.notifier).selectPack(pack.name);
-                    ref.read(packProvider.notifier).setChips(pack.chips);
+                  },
+                  onDownload: () {
+                    ref.read(packProvider.notifier).downloadPack(pack.path, pack.name);
                   },
                 ),
               );
@@ -217,35 +256,22 @@ class _PackPageState extends ConsumerState<PackPage> {
   }
 }
 
-// ── Mock data model (temporary until gRPC proto is generated for Dart) ──
-class _MockPackInfo {
-  final String name;
-  final String vendor;
-  final String version;
-  final String description;
-  final List<String> chips;
-  final String path;
-
-  const _MockPackInfo({
-    required this.name,
-    required this.vendor,
-    required this.version,
-    required this.description,
-    required this.chips,
-    required this.path,
-  });
-}
-
 // ── Pack Card Widget ──
 class _PackCard extends StatelessWidget {
-  final _MockPackInfo pack;
+  final PackInfo pack;
   final bool isSelected;
+  final bool isInstalled;
+  final bool isSearchResult;
   final VoidCallback onSelect;
+  final VoidCallback onDownload;
 
   const _PackCard({
     required this.pack,
     required this.isSelected,
+    required this.isInstalled,
+    required this.isSearchResult,
     required this.onSelect,
+    required this.onDownload,
   });
 
   @override
@@ -292,11 +318,6 @@ class _PackCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                pack.description,
-                style: theme.textTheme.bodySmall,
-              ),
-              const SizedBox(height: 2),
-              Text(
                 pack.vendor,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: cs.outline,
@@ -310,7 +331,7 @@ class _PackCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      '${pack.chips.length} chips: ${pack.chips.take(3).join(', ')}${pack.chips.length > 3 ? '…' : ''}',
+                      '${pack.supportedChips.length} chips: ${pack.supportedChips.take(3).join(', ')}${pack.supportedChips.length > 3 ? '…' : ''}',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: cs.onSurfaceVariant,
                       ),
@@ -337,6 +358,19 @@ class _PackCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  // Download button for search results that aren't installed
+                  if (isSearchResult && !isInstalled)
+                    OutlinedButton.icon(
+                      onPressed: onDownload,
+                      icon: const Icon(Icons.download, size: 16),
+                      label: const Text('下载'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
                 ],
               ),
             ],
