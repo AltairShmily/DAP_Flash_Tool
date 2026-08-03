@@ -1,5 +1,4 @@
 import '../proto/dap_flash.pb.dart';
-import '../proto/dap_flash.pbgrpc.dart';
 import 'grpc_client.dart';
 
 class DeviceService {
@@ -16,12 +15,13 @@ class DeviceService {
     required int frequency,
     required String protocol,
   }) async {
-    return await _client.stub.connectProbe(ConnectRequest(
-      probeId: probeId,
-      target: target,
-      frequency: frequency,
-      protocol: protocol,
-    ));
+    return await _client.stub.connectProbe(
+      ConnectRequest()
+        ..probeId = probeId
+        ..target = target
+        ..frequency = frequency
+        ..protocol = protocol,
+    );
   }
 
   Future<void> disconnect() async {

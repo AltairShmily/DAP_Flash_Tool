@@ -1,5 +1,5 @@
+import 'package:fixnum/fixnum.dart';
 import '../proto/dap_flash.pb.dart';
-import '../proto/dap_flash.pbgrpc.dart';
 import 'grpc_client.dart';
 
 class FlashService {
@@ -10,11 +10,12 @@ class FlashService {
     required int startAddress,
     String driver = 'pyocd',
   }) async* {
-    final call = _client.stub.flashFirmware(FlashRequest(
-      firmwarePath: firmwarePath,
-      startAddress: startAddress,
-      driver: driver,
-    ));
+    final call = _client.stub.flashFirmware(
+      FlashRequest()
+        ..firmwarePath = firmwarePath
+        ..startAddress = Int64(startAddress)
+        ..driver = driver,
+    );
 
     await for (final update in call) {
       yield update;
@@ -22,7 +23,7 @@ class FlashService {
   }
 
   Stream<ProgressUpdate> eraseChip({String mode = 'chip'}) async* {
-    final call = _client.stub.eraseChip(EraseRequest(mode: mode));
+    final call = _client.stub.eraseChip(EraseRequest()..mode = mode);
 
     await for (final update in call) {
       yield update;

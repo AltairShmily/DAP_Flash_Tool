@@ -1,5 +1,4 @@
 import '../proto/dap_flash.pb.dart';
-import '../proto/dap_flash.pbgrpc.dart';
 import 'grpc_client.dart';
 
 class PackService {
@@ -11,7 +10,7 @@ class PackService {
   }
 
   Future<List<PackInfo>> searchPacks(String query) async {
-    final response = await _client.stub.searchPacks(SearchRequest(query: query));
+    final response = await _client.stub.searchPacks(SearchRequest()..query = query);
     return response.packs;
   }
 
@@ -19,10 +18,11 @@ class PackService {
     required String packUrl,
     required String packName,
   }) async* {
-    final call = _client.stub.downloadPack(DownloadRequest(
-      packUrl: packUrl,
-      packName: packName,
-    ));
+    final call = _client.stub.downloadPack(
+      DownloadRequest()
+        ..packUrl = packUrl
+        ..packName = packName,
+    );
 
     await for (final update in call) {
       yield update;
