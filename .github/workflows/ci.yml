@@ -101,22 +101,6 @@ jobs:
           rm -rf flutter_app/windows
           cd flutter_app && flutter create --platforms=windows .
 
-      - name: Install protoc
-        shell: bash
-        run: choco install protoc -y
-
-      - name: Install Dart protoc plugin
-        shell: bash
-        run: |
-          dart pub global activate protoc_plugin 21.0.0
-          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
-
-      - name: Generate Dart gRPC code
-        shell: bash
-        run: |
-          mkdir -p flutter_app/lib/proto
-          protoc --dart_out=grpc:flutter_app/lib/proto -I proto proto/dap_flash.proto
-
       - name: Install dependencies
         working-directory: flutter_app
         run: flutter pub get
