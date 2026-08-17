@@ -113,7 +113,7 @@ class _FirmwarePreviewPageState extends ConsumerState<FirmwarePreviewPage> {
 
   void _previousPage() {
     setState(() {
-      _offset = (_offset - _length).clamp(0, double.maxFinite.toInt());
+      _offset = (_offset - _length).clamp(0, 1 << 32);
     });
     _loadPreview();
   }
