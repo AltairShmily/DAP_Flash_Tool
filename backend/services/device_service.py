@@ -79,11 +79,35 @@ class DeviceServiceMixin:
             self._active_driver_name = ""
         return empty_pb2.Empty()
 
+    def GetProbeDetails(self, request, context):
+        """Get detailed probe information."""
+        probe_id = request.probe_id
+        for driver in self._drivers.values():
+            try:
+                if hasattr(driver, 'get_probe_details'):
+                    details = driver.get_probe_details(probe_id)
+                    return dap_flash_pb2.ProbeDetails(
+                        id=details.id,
+                        name=details.name,
+                        vendor=details.vendor,
+                        serial_number=details.serial_number,
+                        firmware_version=details.firmware_version,
+                        hardware_version=details.hardware_version,
+                        target_voltage=details.target_voltage,
+                        is_connected=details.is_connected,
+                    )
+            except Exception:
+                continue
+        context.abort(grpc.StatusCode.NOT_FOUND, f"Probe {probe_id} not found")
+
     def ResetTarget(self, request, context):
         if not self._active_driver:
             return dap_flash_pb2.OperationResult(success=False, message="No device connected")
         try:
-            self._active_driver.reset()
+            if request.type == dap_flash_pb2.ResetRequest.SOFTWARE:
+                self._active_driver.reset_software()
+            else:
+                self._active_driver.reset_hardware()
             return dap_flash_pb2.OperationResult(success=True, message="Target reset successfully")
         except Exception as e:
             return dap_flash_pb2.OperationResult(success=False, message=str(e))

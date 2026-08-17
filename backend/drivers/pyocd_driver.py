@@ -18,9 +18,28 @@ class PyOCDDriver(BaseDriver):
                 name=probe.product_name or "Unknown",
                 vendor=probe.vendor_name or "Unknown",
                 serial_number=probe.unique_id,
+                firmware_version=getattr(probe, 'firmware_version', '') or "Unknown",
+                hardware_version=getattr(probe, 'hardware_version', '') or "Unknown",
+                target_voltage=getattr(probe, 'target_voltage', 0.0) or 0.0,
             )
             for probe in probes
         ]
+
+    def get_probe_details(self, probe_id: str) -> ProbeInfo:
+        """Get detailed probe information."""
+        probes = ConnectHelper.get_all_connected_probes()
+        for probe in probes:
+            if probe.unique_id == probe_id:
+                return ProbeInfo(
+                    id=probe.unique_id,
+                    name=probe.product_name or "Unknown",
+                    vendor=probe.vendor_name or "Unknown",
+                    serial_number=probe.unique_id,
+                    firmware_version=getattr(probe, 'firmware_version', '') or "Unknown",
+                    hardware_version=getattr(probe, 'hardware_version', '') or "Unknown",
+                    target_voltage=getattr(probe, 'target_voltage', 0.0) or 0.0,
+                )
+        raise ValueError(f"Probe {probe_id} not found")
 
     def connect(self, probe_id: str, target: str, frequency: int, protocol: str = "swd") -> None:
         self._session = ConnectHelper.session_with_chosen_probe(
@@ -64,6 +83,19 @@ class PyOCDDriver(BaseDriver):
         if not self._session:
             raise RuntimeError("Not connected to any probe")
         self._session.target.reset()
+
+    def reset_software(self) -> None:
+        """Software reset."""
+        if not self._session:
+            raise RuntimeError("Not connected to any probe")
+        self._session.target.reset()
+
+    def reset_hardware(self) -> None:
+        """Hardware reset."""
+        if not self._session:
+            raise RuntimeError("Not connected to any probe")
+        self._session.target.reset_and_halt()
+        self._session.target.resume()
 
     def read_chip_id(self) -> ChipInfo:
         if not self._session:

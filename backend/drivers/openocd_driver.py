@@ -72,6 +72,15 @@ class OpenOCDDriver(BaseDriver):
     def reset(self) -> None:
         self._send_tcl("reset")
 
+    def reset_software(self) -> None:
+        """Software reset."""
+        self._send_tcl("reset")
+
+    def reset_hardware(self) -> None:
+        """Hardware reset."""
+        self._send_tcl("reset halt")
+        self._send_tcl("resume")
+
     def read_chip_id(self) -> ChipInfo:
         result = self._send_tcl("targets")
         return ChipInfo(chip_id=0, description=result.strip())

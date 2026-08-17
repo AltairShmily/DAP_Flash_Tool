@@ -442,11 +442,11 @@ class _DevicePageState extends ConsumerState<DevicePage> {
                       child: OutlinedButton.icon(
                         onPressed: deviceState.isConnected
                             ? () async {
-                                ref.read(logProvider.notifier).info('Resetting target...');
+                                ref.read(logProvider.notifier).info('Software reset...');
                                 final result = await ref
                                     .read(deviceProvider.notifier)
-                                    .resetTarget();
-                                ref.read(logProvider.notifier).info('${strings.logReset}: $result');
+                                    .resetTarget(type: 'software');
+                                ref.read(logProvider.notifier).info('Reset: $result');
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text(result)),
@@ -455,7 +455,28 @@ class _DevicePageState extends ConsumerState<DevicePage> {
                               }
                             : null,
                         icon: const Icon(Icons.restart_alt),
-                        label: Text(strings.resetBtn),
+                        label: const Text('软件复位'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: deviceState.isConnected
+                            ? () async {
+                                ref.read(logProvider.notifier).info('Hardware reset...');
+                                final result = await ref
+                                    .read(deviceProvider.notifier)
+                                    .resetTarget(type: 'hardware');
+                                ref.read(logProvider.notifier).info('Reset: $result');
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(result)),
+                                  );
+                                }
+                              }
+                            : null,
+                        icon: const Icon(Icons.power_settings_new),
+                        label: const Text('硬件复位'),
                       ),
                     ),
                   ],

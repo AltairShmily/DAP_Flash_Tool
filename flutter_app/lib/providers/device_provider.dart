@@ -170,9 +170,9 @@ class DeviceNotifier extends StateNotifier<DeviceState> {
   }
 
   /// Reset the target device
-  Future<String> resetTarget() async {
+  Future<String> resetTarget({String type = 'software'}) async {
     try {
-      final result = await _service.reset();
+      final result = await _service.reset(type: type);
       return result.message;
     } catch (e) {
       return 'Error: $e';

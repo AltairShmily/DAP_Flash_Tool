@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from . import dap_flash_pb2 as dap__flash__pb2
+from proto import dap_flash_pb2 as dap__flash__pb2
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 GRPC_GENERATED_VERSION = '1.83.0'
@@ -50,6 +50,11 @@ class DapFlashServiceStub:
                 request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
+        self.GetProbeDetails = channel.unary_unary(
+                '/dap_flash.DapFlashService/GetProbeDetails',
+                request_serializer=dap__flash__pb2.GetProbeDetailsRequest.SerializeToString,
+                response_deserializer=dap__flash__pb2.ProbeDetails.FromString,
+                _registered_method=True)
         self.FlashFirmware = channel.unary_stream(
                 '/dap_flash.DapFlashService/FlashFirmware',
                 request_serializer=dap__flash__pb2.FlashRequest.SerializeToString,
@@ -62,7 +67,7 @@ class DapFlashServiceStub:
                 _registered_method=True)
         self.ResetTarget = channel.unary_unary(
                 '/dap_flash.DapFlashService/ResetTarget',
-                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                request_serializer=dap__flash__pb2.ResetRequest.SerializeToString,
                 response_deserializer=dap__flash__pb2.OperationResult.FromString,
                 _registered_method=True)
         self.ReadChipId = channel.unary_unary(
@@ -84,6 +89,26 @@ class DapFlashServiceStub:
                 '/dap_flash.DapFlashService/DownloadPack',
                 request_serializer=dap__flash__pb2.DownloadRequest.SerializeToString,
                 response_deserializer=dap__flash__pb2.ProgressUpdate.FromString,
+                _registered_method=True)
+        self.InstallPack = channel.unary_unary(
+                '/dap_flash.DapFlashService/InstallPack',
+                request_serializer=dap__flash__pb2.InstallPackRequest.SerializeToString,
+                response_deserializer=dap__flash__pb2.OperationResult.FromString,
+                _registered_method=True)
+        self.ListInstalledPacks = channel.unary_unary(
+                '/dap_flash.DapFlashService/ListInstalledPacks',
+                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                response_deserializer=dap__flash__pb2.InstalledPackList.FromString,
+                _registered_method=True)
+        self.PreviewFirmware = channel.unary_unary(
+                '/dap_flash.DapFlashService/PreviewFirmware',
+                request_serializer=dap__flash__pb2.PreviewRequest.SerializeToString,
+                response_deserializer=dap__flash__pb2.PreviewResponse.FromString,
+                _registered_method=True)
+        self.GetFileInfo = channel.unary_unary(
+                '/dap_flash.DapFlashService/GetFileInfo',
+                request_serializer=dap__flash__pb2.PreviewRequest.SerializeToString,
+                response_deserializer=dap__flash__pb2.FileInfo.FromString,
                 _registered_method=True)
         self.GetFlashHistory = channel.unary_unary(
                 '/dap_flash.DapFlashService/GetFlashHistory',
@@ -109,6 +134,12 @@ class DapFlashServiceServicer:
         raise NotImplementedError('Method not implemented!')
 
     def DisconnectProbe(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetProbeDetails(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -158,6 +189,31 @@ class DapFlashServiceServicer:
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def InstallPack(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListInstalledPacks(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def PreviewFirmware(self, request, context):
+        """File preview
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetFileInfo(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def GetFlashHistory(self, request, context):
         """History
         """
@@ -183,6 +239,11 @@ def add_DapFlashServiceServicer_to_server(servicer, server):
                     request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
+            'GetProbeDetails': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetProbeDetails,
+                    request_deserializer=dap__flash__pb2.GetProbeDetailsRequest.FromString,
+                    response_serializer=dap__flash__pb2.ProbeDetails.SerializeToString,
+            ),
             'FlashFirmware': grpc.unary_stream_rpc_method_handler(
                     servicer.FlashFirmware,
                     request_deserializer=dap__flash__pb2.FlashRequest.FromString,
@@ -195,7 +256,7 @@ def add_DapFlashServiceServicer_to_server(servicer, server):
             ),
             'ResetTarget': grpc.unary_unary_rpc_method_handler(
                     servicer.ResetTarget,
-                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    request_deserializer=dap__flash__pb2.ResetRequest.FromString,
                     response_serializer=dap__flash__pb2.OperationResult.SerializeToString,
             ),
             'ReadChipId': grpc.unary_unary_rpc_method_handler(
@@ -217,6 +278,26 @@ def add_DapFlashServiceServicer_to_server(servicer, server):
                     servicer.DownloadPack,
                     request_deserializer=dap__flash__pb2.DownloadRequest.FromString,
                     response_serializer=dap__flash__pb2.ProgressUpdate.SerializeToString,
+            ),
+            'InstallPack': grpc.unary_unary_rpc_method_handler(
+                    servicer.InstallPack,
+                    request_deserializer=dap__flash__pb2.InstallPackRequest.FromString,
+                    response_serializer=dap__flash__pb2.OperationResult.SerializeToString,
+            ),
+            'ListInstalledPacks': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListInstalledPacks,
+                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    response_serializer=dap__flash__pb2.InstalledPackList.SerializeToString,
+            ),
+            'PreviewFirmware': grpc.unary_unary_rpc_method_handler(
+                    servicer.PreviewFirmware,
+                    request_deserializer=dap__flash__pb2.PreviewRequest.FromString,
+                    response_serializer=dap__flash__pb2.PreviewResponse.SerializeToString,
+            ),
+            'GetFileInfo': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetFileInfo,
+                    request_deserializer=dap__flash__pb2.PreviewRequest.FromString,
+                    response_serializer=dap__flash__pb2.FileInfo.SerializeToString,
             ),
             'GetFlashHistory': grpc.unary_unary_rpc_method_handler(
                     servicer.GetFlashHistory,
@@ -316,6 +397,33 @@ class DapFlashService:
             _registered_method=True)
 
     @staticmethod
+    def GetProbeDetails(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/dap_flash.DapFlashService/GetProbeDetails',
+            dap__flash__pb2.GetProbeDetailsRequest.SerializeToString,
+            dap__flash__pb2.ProbeDetails.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
     def FlashFirmware(request,
             target,
             options=(),
@@ -384,7 +492,7 @@ class DapFlashService:
             request,
             target,
             '/dap_flash.DapFlashService/ResetTarget',
-            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            dap__flash__pb2.ResetRequest.SerializeToString,
             dap__flash__pb2.OperationResult.FromString,
             options,
             channel_credentials,
@@ -494,6 +602,114 @@ class DapFlashService:
             '/dap_flash.DapFlashService/DownloadPack',
             dap__flash__pb2.DownloadRequest.SerializeToString,
             dap__flash__pb2.ProgressUpdate.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def InstallPack(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/dap_flash.DapFlashService/InstallPack',
+            dap__flash__pb2.InstallPackRequest.SerializeToString,
+            dap__flash__pb2.OperationResult.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListInstalledPacks(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/dap_flash.DapFlashService/ListInstalledPacks',
+            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            dap__flash__pb2.InstalledPackList.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def PreviewFirmware(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/dap_flash.DapFlashService/PreviewFirmware',
+            dap__flash__pb2.PreviewRequest.SerializeToString,
+            dap__flash__pb2.PreviewResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetFileInfo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/dap_flash.DapFlashService/GetFileInfo',
+            dap__flash__pb2.PreviewRequest.SerializeToString,
+            dap__flash__pb2.FileInfo.FromString,
             options,
             channel_credentials,
             insecure,

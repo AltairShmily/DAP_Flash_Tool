@@ -8,17 +8,24 @@ service DapFlashService {
   rpc ListProbes(google.protobuf.Empty) returns (ProbeList);
   rpc ConnectProbe(ConnectRequest) returns (ConnectResponse);
   rpc DisconnectProbe(google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc GetProbeDetails(GetProbeDetailsRequest) returns (ProbeDetails);
 
   // Flash operations (streaming progress)
   rpc FlashFirmware(FlashRequest) returns (stream ProgressUpdate);
   rpc EraseChip(EraseRequest) returns (stream ProgressUpdate);
-  rpc ResetTarget(google.protobuf.Empty) returns (OperationResult);
+  rpc ResetTarget(ResetRequest) returns (OperationResult);
   rpc ReadChipId(google.protobuf.Empty) returns (ChipIdResult);
 
   // Pack management
   rpc ListPacks(google.protobuf.Empty) returns (PackList);
   rpc SearchPacks(SearchRequest) returns (PackSearchResult);
   rpc DownloadPack(DownloadRequest) returns (stream ProgressUpdate);
+  rpc InstallPack(InstallPackRequest) returns (OperationResult);
+  rpc ListInstalledPacks(google.protobuf.Empty) returns (InstalledPackList);
+
+  // File preview
+  rpc PreviewFirmware(PreviewRequest) returns (PreviewResponse);
+  rpc GetFileInfo(PreviewRequest) returns (FileInfo);
 
   // History
   rpc GetFlashHistory(google.protobuf.Empty) returns (FlashHistoryList);
@@ -121,4 +128,60 @@ message FlashRecord {
 
 message FlashHistoryList {
   repeated FlashRecord records = 1;
+}
+
+message InstallPackRequest {
+  string pack_path = 1;
+}
+
+message InstalledPack {
+  string name = 1;
+  string vendor = 2;
+  string version = 3;
+  repeated string supported_chips = 4;
+}
+
+message InstalledPackList {
+  repeated InstalledPack packs = 1;
+}
+
+message GetProbeDetailsRequest {
+  string probe_id = 1;
+}
+
+message ProbeDetails {
+  string id = 1;
+  string name = 2;
+  string vendor = 3;
+  string serial_number = 4;
+  string firmware_version = 5;
+  string hardware_version = 6;
+  float target_voltage = 7;
+  bool is_connected = 8;
+}
+
+message ResetRequest {
+  enum ResetType {
+    SOFTWARE = 0;
+    HARDWARE = 1;
+  }
+  ResetType type = 1;
+}
+
+message PreviewRequest {
+  string file_path = 1;
+  int64 offset = 2;
+  int32 length = 3;
+}
+
+message PreviewResponse {
+  string hex_dump = 1;
+  int64 total_size = 2;
+  string file_format = 3;
+}
+
+message FileInfo {
+  string format = 1;
+  int64 total_size = 2;
+  int64 base_address = 3;
 }

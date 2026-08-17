@@ -28,8 +28,14 @@ class DeviceService {
     await _client.stub.disconnectProbe(DisconnectProbeRequest());
   }
 
-  Future<OperationResult> reset() async {
-    return await _client.stub.resetTarget(ResetTargetRequest());
+  Future<OperationResult> reset({String type = 'software'}) async {
+    final request = ResetRequest();
+    if (type == 'hardware') {
+      request.type = ResetRequest_ResetType.HARDWARE;
+    } else {
+      request.type = ResetRequest_ResetType.SOFTWARE;
+    }
+    return await _client.stub.resetTarget(request);
   }
 
   Future<ChipIdResult> readChipId() async {

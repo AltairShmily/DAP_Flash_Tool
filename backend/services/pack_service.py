@@ -64,3 +64,31 @@ class PackServiceMixin:
                 phase=dap_flash_pb2.ProgressUpdate.PROGRAMMING, progress=0.0,
                 message=f"Download failed: {str(e)}",
             )
+
+    def InstallPack(self, request, context):
+        """Install a CMSIS pack."""
+        if not self._active_driver:
+            return dap_flash_pb2.OperationResult(success=False, message="No device connected")
+        try:
+            success = self._active_driver.install_pack(request.pack_path)
+            return dap_flash_pb2.OperationResult(success=success, message="Pack installed successfully")
+        except Exception as e:
+            return dap_flash_pb2.OperationResult(success=False, message=str(e))
+
+    def ListInstalledPacks(self, request, context):
+        """List installed packs."""
+        packs = []
+        for driver in self._drivers.values():
+            try:
+                if hasattr(driver, 'list_installed_packs'):
+                    driver_packs = driver.list_installed_packs()
+                    for pack in driver_packs:
+                        packs.append(dap_flash_pb2.InstalledPack(
+                            name=pack.get('name', ''),
+                            vendor=pack.get('vendor', ''),
+                            version=pack.get('version', ''),
+                            supported_chips=pack.get('supported_chips', []),
+                        ))
+            except Exception:
+                continue
+        return dap_flash_pb2.InstalledPackList(packs=packs)

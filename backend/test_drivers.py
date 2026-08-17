@@ -64,8 +64,39 @@ def test_openocd_list_installed_packs():
     assert isinstance(packs, list)
     assert len(packs) == 0
 
+def test_probe_info_fields():
+    """Test ProbeInfo has all required fields."""
+    info = ProbeInfo(
+        id="test",
+        name="Test Probe",
+        vendor="Test Vendor",
+        serial_number="12345",
+        firmware_version="1.0.0",
+        hardware_version="2.0.0",
+        target_voltage=3.3,
+    )
+    assert info.firmware_version == "1.0.0"
+    assert info.hardware_version == "2.0.0"
+    assert info.target_voltage == 3.3
+    assert info.is_connected == False
+
+def test_pyocd_reset_methods_exist():
+    """Test pyocd driver has reset methods."""
+    if not HAS_PYOCD:
+        pytest.skip("pyocd not installed")
+    driver = PyOCDDriver()
+    assert hasattr(driver, 'reset_software')
+    assert hasattr(driver, 'reset_hardware')
+
+def test_openocd_reset_methods_exist():
+    """Test openocd driver has reset methods."""
+    driver = OpenOCDDriver()
+    assert hasattr(driver, 'reset_software')
+    assert hasattr(driver, 'reset_hardware')
+
 if __name__ == "__main__":
     test_base_class()
     test_pyocd_init()
     test_openocd_init()
+    test_probe_info_fields()
     print("All driver tests passed!")

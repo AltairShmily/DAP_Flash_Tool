@@ -16,12 +16,14 @@ from proto import dap_flash_pb2_grpc
 from services.device_service import DeviceServiceMixin
 from services.flash_service import FlashServiceMixin
 from services.pack_service import PackServiceMixin
+from services.file_service import FileServiceMixin
 
 
 class DapFlashService(
     DeviceServiceMixin,
     FlashServiceMixin,
     PackServiceMixin,
+    FileServiceMixin,
     dap_flash_pb2_grpc.DapFlashServiceServicer,
 ):
     """Combined gRPC servicer implementing all DapFlashService RPCs."""

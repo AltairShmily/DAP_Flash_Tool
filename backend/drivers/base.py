@@ -9,6 +9,10 @@ class ProbeInfo:
     name: str
     vendor: str
     serial_number: str
+    firmware_version: str = ""
+    hardware_version: str = ""
+    target_voltage: float = 0.0
+    is_connected: bool = False
 
 
 @dataclass
@@ -53,6 +57,16 @@ class BaseDriver(ABC):
     @abstractmethod
     def reset(self) -> None:
         """Reset target."""
+        ...
+
+    @abstractmethod
+    def reset_software(self) -> None:
+        """Software reset via DAP command."""
+        ...
+
+    @abstractmethod
+    def reset_hardware(self) -> None:
+        """Hardware reset via DAP reset pin."""
         ...
 
     @abstractmethod

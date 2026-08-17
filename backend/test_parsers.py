@@ -171,9 +171,71 @@ def test_elf_parser():
     os.remove(test_path)
 
 
+def test_hex_preview_bin():
+    """Test hex preview with BIN file."""
+    test_path = "test_preview.bin"
+    test_data = bytes(range(256))
+    with open(test_path, "wb") as f:
+        f.write(test_data)
+    
+    from parsers.hex_preview import preview_hex, get_file_info
+    
+    # Test preview
+    result = preview_hex(test_path, offset=0, length=32)
+    assert "00000000" in result
+    assert "00 01 02 03" in result
+    
+    # Test file info
+    info = get_file_info(test_path)
+    assert info["format"] == "bin"
+    assert info["total_size"] == 256
+    assert info["base_address"] == 0
+    
+    os.remove(test_path)
+    print("HEX preview BIN OK")
+
+
+def test_hex_preview_hex():
+    """Test hex preview with HEX file."""
+    test_path = "test_preview.hex"
+    
+    # Create a minimal valid Intel HEX file
+    lines = []
+    lines.append(":020000040800F2")
+    data = bytes([0xDE, 0xAD, 0xBE, 0xEF])
+    addr = 0x0000
+    rec_type = 0x00
+    byte_count = len(data)
+    checksum = (~(byte_count + (addr >> 8) + (addr & 0xFF) + rec_type + sum(data)) + 1) & 0xFF
+    hex_line = f":{byte_count:02X}{addr:04X}{rec_type:02X}{data.hex().upper()}{checksum:02X}"
+    lines.append(hex_line)
+    lines.append(":00000001FF")
+    
+    with open(test_path, "w") as f:
+        f.write("\n".join(lines) + "\n")
+    
+    from parsers.hex_preview import preview_hex, get_file_info
+    
+    # Test preview with correct offset (0x08000000)
+    result = preview_hex(test_path, offset=0x08000000, length=16)
+    assert "08000000" in result
+    assert "DE AD BE EF" in result
+    
+    # Test file info
+    info = get_file_info(test_path)
+    assert info["format"] == "hex"
+    assert info["total_size"] == 4
+    assert info["base_address"] == 0x08000000
+    
+    os.remove(test_path)
+    print("HEX preview HEX OK")
+
+
 if __name__ == "__main__":
     test_bin_parser()
     test_bin_parser_custom_address()
     test_hex_parser()
     test_elf_parser()
+    test_hex_preview_bin()
+    test_hex_preview_hex()
     print("All parser tests passed!")
