@@ -110,7 +110,7 @@ class FlashNotifier extends StateNotifier<FlashState> {
   }
 
   /// Map proto ProgressUpdate phase to FlashPhase
-  FlashPhase _mapPhase(int protoPhase) {
+  FlashPhase _mapPhase(ProgressUpdate_Phase protoPhase) {
     switch (protoPhase) {
       case ProgressUpdate_Phase.CONNECTING:
         return FlashPhase.connecting;
