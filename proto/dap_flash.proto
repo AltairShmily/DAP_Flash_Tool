@@ -1,8 +1,6 @@
 syntax = "proto3";
 package dap_flash;
 
-import "google/protobuf/empty.proto";
-
 service DapFlashService {
   // Device management
   rpc ListProbes(ListProbesRequest) returns (ProbeList);
