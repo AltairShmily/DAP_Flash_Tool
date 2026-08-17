@@ -5,7 +5,7 @@ class PackService {
   final _client = GrpcClient.instance;
 
   Future<List<PackInfo>> listPacks() async {
-    final response = await _client.stub.listPacks(ListProbesRequest());
+    final response = await _client.stub.listPacks(ListPacksRequest());
     return response.packs;
   }
 
