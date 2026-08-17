@@ -59,3 +59,13 @@ class BaseDriver(ABC):
     def read_chip_id(self) -> ChipInfo:
         """Read chip ID."""
         ...
+
+    @abstractmethod
+    def install_pack(self, pack_path: str) -> bool:
+        """Install a CMSIS pack."""
+        ...
+
+    @abstractmethod
+    def list_installed_packs(self) -> list[dict]:
+        """List installed packs."""
+        ...

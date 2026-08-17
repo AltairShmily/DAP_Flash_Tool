@@ -75,3 +75,11 @@ class OpenOCDDriver(BaseDriver):
     def read_chip_id(self) -> ChipInfo:
         result = self._send_tcl("targets")
         return ChipInfo(chip_id=0, description=result.strip())
+
+    def install_pack(self, pack_path: str) -> bool:
+        """OpenOCD does not support pack management."""
+        raise RuntimeError("OpenOCD does not support pack management")
+
+    def list_installed_packs(self) -> list[dict]:
+        """OpenOCD does not support pack management."""
+        return []

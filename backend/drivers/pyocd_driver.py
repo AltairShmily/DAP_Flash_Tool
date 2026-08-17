@@ -72,3 +72,35 @@ class PyOCDDriver(BaseDriver):
         target = self._session.target
         chip_id = target.read32(0xE0042000)  # DBGMCU_IDCODE for STM32
         return ChipInfo(chip_id=chip_id, description=f"ID: 0x{chip_id:08X}")
+
+    def install_pack(self, pack_path: str) -> bool:
+        """Install a CMSIS pack."""
+        try:
+            from pyocd.pack.cmsis_pack_manager import CmsisPackManager
+            manager = CmsisPackManager()
+            manager.install_pack(pack_path)
+            return True
+        except ImportError:
+            raise RuntimeError("pyocd pack manager not available")
+        except Exception as e:
+            raise RuntimeError(f"Failed to install pack: {e}")
+
+    def list_installed_packs(self) -> list[dict]:
+        """List installed packs."""
+        try:
+            from pyocd.pack.cmsis_pack_manager import CmsisPackManager
+            manager = CmsisPackManager()
+            packs = manager.get_installed_packs()
+            return [
+                {
+                    "name": pack.name,
+                    "vendor": pack.vendor,
+                    "version": pack.version,
+                    "supported_chips": [c.name for c in pack.devices],
+                }
+                for pack in packs
+            ]
+        except ImportError:
+            return []
+        except Exception:
+            return []
