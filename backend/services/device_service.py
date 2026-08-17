@@ -8,7 +8,6 @@ Provides gRPC service methods for:
 """
 
 import grpc
-from google.protobuf import empty_pb2
 
 from proto import dap_flash_pb2
 from drivers.base import BaseDriver
@@ -77,7 +76,7 @@ class DeviceServiceMixin:
             self._active_driver.disconnect()
             self._active_driver = None
             self._active_driver_name = ""
-        return empty_pb2.Empty()
+        return dap_flash_pb2.DisconnectProbeResponse()
 
     def GetProbeDetails(self, request, context):
         """Get detailed probe information."""

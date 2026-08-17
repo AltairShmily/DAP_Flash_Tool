@@ -5,30 +5,30 @@ import "google/protobuf/empty.proto";
 
 service DapFlashService {
   // Device management
-  rpc ListProbes(google.protobuf.Empty) returns (ProbeList);
+  rpc ListProbes(ListProbesRequest) returns (ProbeList);
   rpc ConnectProbe(ConnectRequest) returns (ConnectResponse);
-  rpc DisconnectProbe(google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc DisconnectProbe(DisconnectProbeRequest) returns (DisconnectProbeResponse);
   rpc GetProbeDetails(GetProbeDetailsRequest) returns (ProbeDetails);
 
   // Flash operations (streaming progress)
   rpc FlashFirmware(FlashRequest) returns (stream ProgressUpdate);
   rpc EraseChip(EraseRequest) returns (stream ProgressUpdate);
   rpc ResetTarget(ResetRequest) returns (OperationResult);
-  rpc ReadChipId(google.protobuf.Empty) returns (ChipIdResult);
+  rpc ReadChipId(ReadChipIdRequest) returns (ChipIdResult);
 
   // Pack management
-  rpc ListPacks(google.protobuf.Empty) returns (PackList);
+  rpc ListPacks(ListPacksRequest) returns (PackList);
   rpc SearchPacks(SearchRequest) returns (PackSearchResult);
   rpc DownloadPack(DownloadRequest) returns (stream ProgressUpdate);
   rpc InstallPack(InstallPackRequest) returns (OperationResult);
-  rpc ListInstalledPacks(google.protobuf.Empty) returns (InstalledPackList);
+  rpc ListInstalledPacks(ListInstalledPacksRequest) returns (InstalledPackList);
 
   // File preview
   rpc PreviewFirmware(PreviewRequest) returns (PreviewResponse);
   rpc GetFileInfo(PreviewRequest) returns (FileInfo);
 
   // History
-  rpc GetFlashHistory(google.protobuf.Empty) returns (FlashHistoryList);
+  rpc GetFlashHistory(GetFlashHistoryRequest) returns (FlashHistoryList);
 }
 
 message Probe {
@@ -185,3 +185,12 @@ message FileInfo {
   int64 total_size = 2;
   int64 base_address = 3;
 }
+
+// Empty request/response messages
+message ListProbesRequest {}
+message DisconnectProbeRequest {}
+message DisconnectProbeResponse {}
+message ReadChipIdRequest {}
+message ListPacksRequest {}
+message ListInstalledPacksRequest {}
+message GetFlashHistoryRequest {}

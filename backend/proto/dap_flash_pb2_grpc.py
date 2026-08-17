@@ -4,7 +4,6 @@ import grpc
 import warnings
 
 from . import dap_flash_pb2 as dap__flash__pb2
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 GRPC_GENERATED_VERSION = '1.83.0'
 GRPC_VERSION = grpc.__version__
@@ -37,7 +36,7 @@ class DapFlashServiceStub:
         """
         self.ListProbes = channel.unary_unary(
                 '/dap_flash.DapFlashService/ListProbes',
-                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                request_serializer=dap__flash__pb2.ListProbesRequest.SerializeToString,
                 response_deserializer=dap__flash__pb2.ProbeList.FromString,
                 _registered_method=True)
         self.ConnectProbe = channel.unary_unary(
@@ -47,8 +46,8 @@ class DapFlashServiceStub:
                 _registered_method=True)
         self.DisconnectProbe = channel.unary_unary(
                 '/dap_flash.DapFlashService/DisconnectProbe',
-                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                request_serializer=dap__flash__pb2.DisconnectProbeRequest.SerializeToString,
+                response_deserializer=dap__flash__pb2.DisconnectProbeResponse.FromString,
                 _registered_method=True)
         self.GetProbeDetails = channel.unary_unary(
                 '/dap_flash.DapFlashService/GetProbeDetails',
@@ -72,12 +71,12 @@ class DapFlashServiceStub:
                 _registered_method=True)
         self.ReadChipId = channel.unary_unary(
                 '/dap_flash.DapFlashService/ReadChipId',
-                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                request_serializer=dap__flash__pb2.ReadChipIdRequest.SerializeToString,
                 response_deserializer=dap__flash__pb2.ChipIdResult.FromString,
                 _registered_method=True)
         self.ListPacks = channel.unary_unary(
                 '/dap_flash.DapFlashService/ListPacks',
-                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                request_serializer=dap__flash__pb2.ListPacksRequest.SerializeToString,
                 response_deserializer=dap__flash__pb2.PackList.FromString,
                 _registered_method=True)
         self.SearchPacks = channel.unary_unary(
@@ -97,7 +96,7 @@ class DapFlashServiceStub:
                 _registered_method=True)
         self.ListInstalledPacks = channel.unary_unary(
                 '/dap_flash.DapFlashService/ListInstalledPacks',
-                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                request_serializer=dap__flash__pb2.ListInstalledPacksRequest.SerializeToString,
                 response_deserializer=dap__flash__pb2.InstalledPackList.FromString,
                 _registered_method=True)
         self.PreviewFirmware = channel.unary_unary(
@@ -112,7 +111,7 @@ class DapFlashServiceStub:
                 _registered_method=True)
         self.GetFlashHistory = channel.unary_unary(
                 '/dap_flash.DapFlashService/GetFlashHistory',
-                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                request_serializer=dap__flash__pb2.GetFlashHistoryRequest.SerializeToString,
                 response_deserializer=dap__flash__pb2.FlashHistoryList.FromString,
                 _registered_method=True)
 
@@ -226,7 +225,7 @@ def add_DapFlashServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'ListProbes': grpc.unary_unary_rpc_method_handler(
                     servicer.ListProbes,
-                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    request_deserializer=dap__flash__pb2.ListProbesRequest.FromString,
                     response_serializer=dap__flash__pb2.ProbeList.SerializeToString,
             ),
             'ConnectProbe': grpc.unary_unary_rpc_method_handler(
@@ -236,8 +235,8 @@ def add_DapFlashServiceServicer_to_server(servicer, server):
             ),
             'DisconnectProbe': grpc.unary_unary_rpc_method_handler(
                     servicer.DisconnectProbe,
-                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                    request_deserializer=dap__flash__pb2.DisconnectProbeRequest.FromString,
+                    response_serializer=dap__flash__pb2.DisconnectProbeResponse.SerializeToString,
             ),
             'GetProbeDetails': grpc.unary_unary_rpc_method_handler(
                     servicer.GetProbeDetails,
@@ -261,12 +260,12 @@ def add_DapFlashServiceServicer_to_server(servicer, server):
             ),
             'ReadChipId': grpc.unary_unary_rpc_method_handler(
                     servicer.ReadChipId,
-                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    request_deserializer=dap__flash__pb2.ReadChipIdRequest.FromString,
                     response_serializer=dap__flash__pb2.ChipIdResult.SerializeToString,
             ),
             'ListPacks': grpc.unary_unary_rpc_method_handler(
                     servicer.ListPacks,
-                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    request_deserializer=dap__flash__pb2.ListPacksRequest.FromString,
                     response_serializer=dap__flash__pb2.PackList.SerializeToString,
             ),
             'SearchPacks': grpc.unary_unary_rpc_method_handler(
@@ -286,7 +285,7 @@ def add_DapFlashServiceServicer_to_server(servicer, server):
             ),
             'ListInstalledPacks': grpc.unary_unary_rpc_method_handler(
                     servicer.ListInstalledPacks,
-                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    request_deserializer=dap__flash__pb2.ListInstalledPacksRequest.FromString,
                     response_serializer=dap__flash__pb2.InstalledPackList.SerializeToString,
             ),
             'PreviewFirmware': grpc.unary_unary_rpc_method_handler(
@@ -301,7 +300,7 @@ def add_DapFlashServiceServicer_to_server(servicer, server):
             ),
             'GetFlashHistory': grpc.unary_unary_rpc_method_handler(
                     servicer.GetFlashHistory,
-                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    request_deserializer=dap__flash__pb2.GetFlashHistoryRequest.FromString,
                     response_serializer=dap__flash__pb2.FlashHistoryList.SerializeToString,
             ),
     }
@@ -330,7 +329,7 @@ class DapFlashService:
             request,
             target,
             '/dap_flash.DapFlashService/ListProbes',
-            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            dap__flash__pb2.ListProbesRequest.SerializeToString,
             dap__flash__pb2.ProbeList.FromString,
             options,
             channel_credentials,
@@ -384,8 +383,8 @@ class DapFlashService:
             request,
             target,
             '/dap_flash.DapFlashService/DisconnectProbe',
-            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            dap__flash__pb2.DisconnectProbeRequest.SerializeToString,
+            dap__flash__pb2.DisconnectProbeResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -519,7 +518,7 @@ class DapFlashService:
             request,
             target,
             '/dap_flash.DapFlashService/ReadChipId',
-            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            dap__flash__pb2.ReadChipIdRequest.SerializeToString,
             dap__flash__pb2.ChipIdResult.FromString,
             options,
             channel_credentials,
@@ -546,7 +545,7 @@ class DapFlashService:
             request,
             target,
             '/dap_flash.DapFlashService/ListPacks',
-            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            dap__flash__pb2.ListPacksRequest.SerializeToString,
             dap__flash__pb2.PackList.FromString,
             options,
             channel_credentials,
@@ -654,7 +653,7 @@ class DapFlashService:
             request,
             target,
             '/dap_flash.DapFlashService/ListInstalledPacks',
-            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            dap__flash__pb2.ListInstalledPacksRequest.SerializeToString,
             dap__flash__pb2.InstalledPackList.FromString,
             options,
             channel_credentials,
@@ -735,7 +734,7 @@ class DapFlashService:
             request,
             target,
             '/dap_flash.DapFlashService/GetFlashHistory',
-            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            dap__flash__pb2.GetFlashHistoryRequest.SerializeToString,
             dap__flash__pb2.FlashHistoryList.FromString,
             options,
             channel_credentials,
