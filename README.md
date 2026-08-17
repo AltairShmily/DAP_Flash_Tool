@@ -7,7 +7,10 @@
 - 🔥 **固件烧录** — 支持 BIN、HEX、ELF 格式
 - 🧹 **芯片操作** — 全片擦除、扇区擦除、复位、读取芯片 ID
 - 🔌 **设备管理** — 自动探测 DAP-Link 调试器、SWD/JTAG 协议切换
-- 📦 **Pack 管理** — 本地 Pack 扫描、网络 Pack 搜索下载、芯片信息查询
+- 📦 **Pack 管理** — 本地 Pack 扫描、网络 Pack 搜索下载、芯片信息查询、pyocd Pack 安装
+- 🔄 **双模式复位** — 支持软件复位和硬件复位两种方式
+- 🔍 **设备详情** — 获取 DAP-Link 固件版本、硬件版本、目标电压等详细信息
+- 📄 **固件预览** — HEX/BIN 文件十六进制预览，支持翻页浏览
 - 📜 **烧录历史** — 记录每次烧录的文件、芯片、时间、结果（最多 100 条）
 - 🌙 **深色主题** — 支持深色/浅色主题切换，适应不同工作环境
 
@@ -123,13 +126,18 @@ scripts\build_windows.bat
 | `ListProbes` | Unary | 列出可用调试器 |
 | `ConnectProbe` | Unary | 连接调试器 |
 | `DisconnectProbe` | Unary | 断开连接 |
+| `GetProbeDetails` | Unary | 获取调试器详细信息（固件版本、硬件版本、目标电压） |
 | `FlashFirmware` | Server Stream | 烧录固件（流式进度） |
 | `EraseChip` | Server Stream | 擦除芯片（流式进度） |
-| `ResetTarget` | Unary | 复位目标 |
+| `ResetTarget` | Unary | 复位目标（支持软件/硬件复位） |
 | `ReadChipId` | Unary | 读取芯片 ID |
 | `ListPacks` | Unary | 列出已安装 Pack |
 | `SearchPacks` | Unary | 搜索 Pack |
 | `DownloadPack` | Server Stream | 下载 Pack（流式进度） |
+| `InstallPack` | Unary | 安装 CMSIS Pack |
+| `ListInstalledPacks` | Unary | 列出已安装的 Pack |
+| `PreviewFirmware` | Unary | 预览固件文件（十六进制） |
+| `GetFileInfo` | Unary | 获取固件文件信息 |
 | `GetFlashHistory` | Unary | 获取烧录历史 |
 
 ## 许可证

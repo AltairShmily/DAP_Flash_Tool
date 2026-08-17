@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from proto import dap_flash_pb2 as dap__flash__pb2
+from . import dap_flash_pb2 as dap__flash__pb2
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 GRPC_GENERATED_VERSION = '1.83.0'
