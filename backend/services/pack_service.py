@@ -27,6 +27,7 @@ class PackServiceMixin:
                 dap_flash_pb2.PackInfo(
                     name=p.name, vendor=p.vendor, version=p.version, path=p.path,
                     supported_chips=[c.name for c in p.chips],
+                    download_url='',
                 )
                 for p in packs
             ]
@@ -39,6 +40,7 @@ class PackServiceMixin:
                 dap_flash_pb2.PackInfo(
                     name=pack.name, vendor=pack.vendor, version=pack.version, path=pack.path,
                     supported_chips=[chip_name],
+                    download_url='',
                 )
                 for chip_name, pack in results
             ]

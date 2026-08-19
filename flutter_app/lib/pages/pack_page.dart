@@ -221,7 +221,7 @@ class _PackPageState extends ConsumerState<PackPage> {
                     ref.read(packProvider.notifier).selectPack(pack.name);
                   },
                   onDownload: () {
-                    ref.read(packProvider.notifier).downloadPack(pack.path, pack.name);
+                    ref.read(packProvider.notifier).downloadPack(pack.downloadUrl, pack.name);
                   },
                 ),
               );
@@ -358,8 +358,8 @@ class _PackCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  // Download button for search results that aren't installed
-                  if (isSearchResult && !isInstalled)
+                  // Download button for online packs that aren't installed
+                  if (isSearchResult && !isInstalled && pack.downloadUrl.isNotEmpty)
                     OutlinedButton.icon(
                       onPressed: onDownload,
                       icon: const Icon(Icons.download, size: 16),

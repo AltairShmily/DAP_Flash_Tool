@@ -94,6 +94,7 @@ message PackInfo {
   string version = 3;
   string path = 4;
   repeated string supported_chips = 5;
+  string download_url = 6;  // URL for online packs; empty for local packs
 }
 
 message PackList {

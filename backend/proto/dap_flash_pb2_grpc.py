@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from . import dap_flash_pb2 as dap__flash__pb2
+import dap_flash_pb2 as dap__flash__pb2
 
 GRPC_GENERATED_VERSION = '1.83.0'
 GRPC_VERSION = grpc.__version__
