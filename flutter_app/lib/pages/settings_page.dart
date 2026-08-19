@@ -134,27 +134,29 @@ class SettingsPage extends ConsumerWidget {
               children: [
                 Text(strings.selectDebugDriver, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
-                RadioListTile<String>(
-                  title: Text(strings.pyocd),
-                  subtitle: Text(strings.pyocdSubtitle),
-                  value: 'pyocd',
+                RadioGroup<String>(
                   groupValue: settings.driver,
                   onChanged: (v) {
                     if (v != null) ref.read(settingsProvider.notifier).setDriver(v);
                   },
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                ),
-                RadioListTile<String>(
-                  title: Text(strings.openocd),
-                  subtitle: Text(strings.openocdSubtitle),
-                  value: 'openocd',
-                  groupValue: settings.driver,
-                  onChanged: (v) {
-                    if (v != null) ref.read(settingsProvider.notifier).setDriver(v);
-                  },
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
+                  child: Column(
+                    children: [
+                      RadioListTile<String>(
+                        title: Text(strings.pyocd),
+                        subtitle: Text(strings.pyocdSubtitle),
+                        value: 'pyocd',
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                      ),
+                      RadioListTile<String>(
+                        title: Text(strings.openocd),
+                        subtitle: Text(strings.openocdSubtitle),
+                        value: 'openocd',
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -173,7 +175,7 @@ class SettingsPage extends ConsumerWidget {
                 Text(strings.defaultFrequency, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  value: settings.frequency,
+                  initialValue: settings.frequency,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     isDense: true,
@@ -274,7 +276,7 @@ class SettingsPage extends ConsumerWidget {
                 _aboutRow(strings.application, 'DAP Flash Tool'),
                 _aboutRow(strings.version, 'v0.1.0'),
                 _aboutRow('Flutter', '3.x / Riverpod'),
-                _aboutRow('Backend', 'Rust + gRPC'),
+                _aboutRow('Backend', 'Python + gRPC'),
                 const Divider(height: 24),
                 Text(
                   strings.aboutDescription,
@@ -288,7 +290,7 @@ class SettingsPage extends ConsumerWidget {
                     Icon(Icons.code, size: 16, color: theme.colorScheme.outline),
                     const SizedBox(width: 4),
                     Text(
-                      'github.com/nousresearch/dap-flash-tool',
+                      'github.com/AltairShmily/DAP_Flash_Tool',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.primary,
                       ),

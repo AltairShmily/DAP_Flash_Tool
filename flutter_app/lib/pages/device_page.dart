@@ -200,7 +200,7 @@ class _DevicePageState extends ConsumerState<DevicePage> {
                 // Probe dropdown
                 if (deviceState.probes.isNotEmpty) ...[
                   DropdownButtonFormField<String>(
-                    value: deviceState.selectedProbeId,
+                    initialValue: deviceState.selectedProbeId,
                     decoration: InputDecoration(
                       labelText: strings.probeId,
                       border: const OutlineInputBorder(),
@@ -263,7 +263,7 @@ class _DevicePageState extends ConsumerState<DevicePage> {
                 Text(strings.frequency, style: theme.textTheme.labelLarge),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<int>(
-                  value: deviceState.frequency,
+                  initialValue: deviceState.frequency,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     isDense: true,
