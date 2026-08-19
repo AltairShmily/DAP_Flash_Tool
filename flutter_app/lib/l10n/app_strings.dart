@@ -159,6 +159,23 @@ class AppStrings {
       'operation': 'Operation',
       'speedTest': 'Speed Test',
       'flashPage': 'Flash',
+      // Runtime environment
+      'runtimeEnvironment': 'Runtime Environment',
+      'backendStatus': 'Backend Status',
+      'backendRunning': 'Running',
+      'backendStopped': 'Stopped',
+      'backendMode': 'Backend Mode',
+      'backendModeBundled': 'Bundled (standalone)',
+      'backendModeVenv': 'Virtual environment',
+      'backendModeSystem': 'System Python',
+      'backendModeNotFound': 'Not found',
+      'grpcConnected': 'gRPC Connected',
+      'grpcDisconnected': 'gRPC Disconnected',
+      'checkEnvironment': 'Check Environment',
+      'environmentOk': 'Environment OK',
+      'environmentError': 'Environment issue detected',
+      'packDirectory': 'Pack Directory',
+      'language': 'Language',
     },
     'zh': {
       'appTitle': 'DAP 烧录工具',
@@ -309,6 +326,23 @@ class AppStrings {
       'operation': '操作',
       'speedTest': '速度测试',
       'flashPage': '烧录',
+      // Runtime environment
+      'runtimeEnvironment': '运行环境',
+      'backendStatus': '后端状态',
+      'backendRunning': '运行中',
+      'backendStopped': '已停止',
+      'backendMode': '后端模式',
+      'backendModeBundled': '打包版（独立运行）',
+      'backendModeVenv': '虚拟环境',
+      'backendModeSystem': '系统 Python',
+      'backendModeNotFound': '未找到',
+      'grpcConnected': 'gRPC 已连接',
+      'grpcDisconnected': 'gRPC 未连接',
+      'checkEnvironment': '检查环境',
+      'environmentOk': '环境正常',
+      'environmentError': '检测到环境问题',
+      'packDirectory': 'Pack 目录',
+      'language': '语言',
     },
   };
 
@@ -421,6 +455,22 @@ class AppStrings {
   String get inProgress => _t('inProgress');
   String get speedTest => _t('speedTest');
   String get flashPage => _t('flashPage');
+  String get runtimeEnvironment => _t('runtimeEnvironment');
+  String get backendStatus => _t('backendStatus');
+  String get backendRunning => _t('backendRunning');
+  String get backendStopped => _t('backendStopped');
+  String get backendMode => _t('backendMode');
+  String get backendModeBundled => _t('backendModeBundled');
+  String get backendModeVenv => _t('backendModeVenv');
+  String get backendModeSystem => _t('backendModeSystem');
+  String get backendModeNotFound => _t('backendModeNotFound');
+  String get grpcConnected => _t('grpcConnected');
+  String get grpcDisconnected => _t('grpcDisconnected');
+  String get checkEnvironment => _t('checkEnvironment');
+  String get environmentOk => _t('environmentOk');
+  String get environmentError => _t('environmentError');
+  String get packDirectory => _t('packDirectory');
+  String get language => _t('language');
   String get probeList => _t('probeList');
   String get noProbesFound => _t('noProbesFound');
   String get connectProbe => _t('connectProbe');

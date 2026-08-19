@@ -28,6 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r backend/requirements.txt
+          pip install pyinstaller
 
       - name: Generate gRPC code
         run: |
@@ -94,13 +95,20 @@ jobs:
         working-directory: flutter_app
         run: flutter test
 
-  # ─── Windows 构建 ───
+  # ─── Windows 构建（含 PyInstaller 后端打包） ───
   build-windows:
     name: Build Windows
     runs-on: windows-2022
     needs: [python-test, flutter-analyze]
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -117,6 +125,29 @@ jobs:
         shell: bash
         run: dart pub global activate protoc_plugin 21.1.2
 
+      # ── Python backend: generate gRPC + build standalone exe ──
+      - name: Install Python dependencies
+        run: |
+          pip install -r backend/requirements.txt
+          pip install pyinstaller
+
+      - name: Generate Python gRPC code
+        shell: bash
+        run: |
+          mkdir -p backend/proto
+          python -m grpc_tools.protoc \
+            -I proto \
+            --python_out=backend/proto \
+            --grpc_python_out=backend/proto \
+            proto/dap_flash.proto
+          touch backend/proto/__init__.py
+          sed -i 's/^import dap_flash_pb2/from . import dap_flash_pb2/' backend/proto/dap_flash_pb2_grpc.py
+
+      - name: Build backend standalone exe (PyInstaller)
+        working-directory: backend
+        run: pyinstaller server.spec --noconfirm --clean
+
+      # ── Flutter frontend ──
       - name: Generate Dart proto stubs
         shell: bash
         run: |
@@ -140,9 +171,23 @@ jobs:
         working-directory: flutter_app
         run: flutter build windows --release
 
+      # ── Bundle: Flutter app + standalone backend ──
+      - name: Assemble distribution
+        shell: bash
+        run: |
+          mkdir -p dist
+          # Flutter app
+          cp -r flutter_app/build/windows/x64/runner/Release/* dist/
+          # Standalone backend exe → dist/backend/server.exe
+          mkdir -p dist/backend
+          cp backend/dist/server.exe dist/backend/server.exe
+          echo "Distribution assembled:"
+          ls -la dist/
+          ls -la dist/backend/
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: dap-flash-tool-windows
-          path: flutter_app/build/windows/x64/runner/Release/
+          path: dist/
           retention-days: 7
