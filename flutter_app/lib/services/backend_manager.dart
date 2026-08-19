@@ -21,7 +21,22 @@ class BackendManager {
         ['../backend/server.py', '50051'],
         mode: ProcessStartMode.inheritStdio,
       );
+    } else if (backendPath.endsWith('.exe') && !backendPath.contains('server')) {
+      // Bundled executable
+      _process = await Process.start(
+        backendPath,
+        ['50051'],
+        mode: ProcessStartMode.inheritStdio,
+      );
+    } else if (backendPath.contains('venv')) {
+      // Venv python — needs server.py as argument
+      _process = await Process.start(
+        backendPath,
+        ['../backend/server.py', '50051'],
+        mode: ProcessStartMode.inheritStdio,
+      );
     } else {
+      // server.exe or other executable
       _process = await Process.start(
         backendPath,
         ['50051'],
@@ -48,8 +63,18 @@ class BackendManager {
       return bundledPath;
     }
 
+    // Dev mode: look for backend/server.py and use venv python if available
     final devPath = '..${Platform.pathSeparator}backend${Platform.pathSeparator}server.py';
     if (await File(devPath).exists()) {
+      // Try venv python first (more reliable for dependencies)
+      final venvPython = '..${Platform.pathSeparator}backend${Platform.pathSeparator}venv${Platform.pathSeparator}bin${Platform.pathSeparator}python';
+      if (Platform.isLinux && await File(venvPython).exists()) {
+        return venvPython;
+      }
+      final venvPythonWin = '..${Platform.pathSeparator}backend${Platform.pathSeparator}venv${Platform.pathSeparator}Scripts${Platform.pathSeparator}python.exe';
+      if (Platform.isWindows && await File(venvPythonWin).exists()) {
+        return venvPythonWin;
+      }
       return 'python';
     }
 

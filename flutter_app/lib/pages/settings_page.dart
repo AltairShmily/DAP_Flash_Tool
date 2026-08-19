@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_strings.dart';
 import '../providers/theme_provider.dart';
+import '../providers/locale_provider.dart';
 import '../providers/history_provider.dart';
 import '../widgets/collapsible_card.dart';
 
@@ -117,6 +118,32 @@ class SettingsPage extends ConsumerWidget {
                   selected: {themeMode},
                   onSelectionChanged: (modes) {
                     ref.read(themeModeProvider.notifier).setThemeMode(modes.first);
+                  },
+                ),
+                const SizedBox(height: 16),
+                // Language
+                Text('语言', style: theme.textTheme.labelLarge),
+                const SizedBox(height: 8),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final locale = ref.watch(localeProvider);
+                    return DropdownButtonFormField<String>(
+                      initialValue: locale.languageCode,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: 'zh', child: Text('中文')),
+                        DropdownMenuItem(value: 'en', child: Text('English')),
+                      ],
+                      onChanged: (v) {
+                        if (v != null) {
+                          ref.read(localeProvider.notifier).setLocale(Locale(v));
+                        }
+                      },
+                    );
                   },
                 ),
               ],
