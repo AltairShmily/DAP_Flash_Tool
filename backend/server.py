@@ -9,7 +9,9 @@ import os
 import time
 from concurrent import futures
 
-sys.path.insert(0, os.path.dirname(__file__))
+_backend_dir = os.path.dirname(__file__)
+sys.path.insert(0, _backend_dir)
+sys.path.insert(0, os.path.join(_backend_dir, 'proto'))
 
 import grpc
 from proto import dap_flash_pb2_grpc
