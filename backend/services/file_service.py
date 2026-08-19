@@ -6,6 +6,8 @@ Provides gRPC service methods for:
 """
 
 import os
+import grpc
+
 from proto import dap_flash_pb2
 from parsers.hex_preview import preview_hex, get_file_info
 

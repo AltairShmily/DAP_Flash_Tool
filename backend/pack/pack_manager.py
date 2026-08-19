@@ -69,3 +69,39 @@ class PackManager:
                 if chip.name.lower() == chip_name.lower():
                     return chip
         return None
+
+    def install_pack(self, pack_path: str) -> bool:
+        """Install a .pack file into the managed packs directory.
+
+        Copies the file (if not already inside), parses it, and indexes it.
+        """
+        pack_path = os.path.abspath(pack_path)
+        if not os.path.isfile(pack_path):
+            raise FileNotFoundError(f"Pack file not found: {pack_path}")
+        if not pack_path.endswith('.pack'):
+            raise ValueError("Only .pack files are supported")
+
+        # If the file is outside our packs dir, copy it in
+        dest = os.path.join(self._packs_dir, os.path.basename(pack_path))
+        if os.path.normpath(pack_path) != os.path.normpath(dest):
+            import shutil
+            shutil.copy2(pack_path, dest)
+            pack_path = dest
+
+        # Parse and index
+        pack_info = parse_pack(pack_path)
+        self._packs[pack_path] = pack_info
+        self._save_index()
+        return True
+
+    def list_installed_packs(self) -> list[dict]:
+        """Return all installed packs as plain dicts."""
+        return [
+            {
+                'name': p.name,
+                'vendor': p.vendor,
+                'version': p.version,
+                'supported_chips': [c.name for c in p.chips],
+            }
+            for p in self._packs.values()
+        ]
