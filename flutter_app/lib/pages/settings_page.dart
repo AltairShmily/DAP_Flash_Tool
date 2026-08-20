@@ -146,7 +146,7 @@ class SettingsPage extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ── Runtime Environment ──
-          CollapsibleCard(
+          CollapsibleCard(index: 0,
             title: strings.runtimeEnvironment,
             icon: Icons.monitor_heart,
             subtitle: runtime.grpcConnected
@@ -238,7 +238,7 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 8),
 
           // ── Appearance ──
-          CollapsibleCard(
+          CollapsibleCard(index: 1,
             title: strings.appearance,
             icon: Icons.palette,
             subtitle: _themeModeLabel(themeMode, strings),
@@ -302,7 +302,7 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 8),
 
           // ── Driver ──
-          CollapsibleCard(
+          CollapsibleCard(index: 2,
             title: strings.debugDriver,
             icon: Icons.build,
             subtitle: settings.driver == 'pyocd' ? strings.pyocd : strings.openocd,
@@ -341,7 +341,7 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 8),
 
           // ── Defaults ──
-          CollapsibleCard(
+          CollapsibleCard(index: 3,
             title: strings.flashDefaults,
             icon: Icons.tune,
             subtitle: '${_freqLabel(settings.frequency)} · ${settings.protocol.toUpperCase()}',
@@ -397,7 +397,7 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 8),
 
           // ── History ──
-          CollapsibleCard(
+          CollapsibleCard(index: 4,
             title: strings.flashHistory,
             icon: Icons.history,
             child: Column(
@@ -444,7 +444,7 @@ class SettingsPage extends ConsumerWidget {
           const SizedBox(height: 8),
 
           // ── About ──
-          CollapsibleCard(
+          CollapsibleCard(index: 5,
             title: strings.about,
             icon: Icons.info_outline,
             child: Column(

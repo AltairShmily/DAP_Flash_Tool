@@ -165,7 +165,7 @@ class _DevicePageState extends ConsumerState<DevicePage> {
           const SizedBox(height: 8),
 
           // ── Probe Scanning ──
-          CollapsibleCard(
+          CollapsibleCard(index: 0,
             title: strings.probeList,
             icon: Icons.radar,
             subtitle: deviceState.isScanning
@@ -252,7 +252,7 @@ class _DevicePageState extends ConsumerState<DevicePage> {
           const SizedBox(height: 8),
 
           // ── Connection Settings ──
-          CollapsibleCard(
+          CollapsibleCard(index: 1,
             title: strings.connectionParams,
             icon: Icons.settings_ethernet,
             subtitle: '${_freqLabel(deviceState.frequency)} · ${deviceState.protocol.toUpperCase()}',
@@ -395,7 +395,7 @@ class _DevicePageState extends ConsumerState<DevicePage> {
           const SizedBox(height: 8),
 
           // ── Device Actions ──
-          CollapsibleCard(
+          CollapsibleCard(index: 2,
             title: strings.connectedDeviceInfo,
             icon: Icons.memory,
             subtitle: deviceState.isConnected

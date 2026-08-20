@@ -54,7 +54,7 @@ class _PackPageState extends ConsumerState<PackPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ── Search & Actions ──
-          CollapsibleCard(
+          CollapsibleCard(index: 0,
             title: strings.packManagement,
             icon: Icons.inventory_2,
             subtitle: '${packState.packs.length} ${strings.packsLoaded}',
@@ -230,7 +230,7 @@ class _PackPageState extends ConsumerState<PackPage> {
           // ── Selected Pack Chips ──
           if (packState.selectedPack != null && packState.availableChips.isNotEmpty) ...[
             const SizedBox(height: 8),
-            CollapsibleCard(
+            CollapsibleCard(index: 1,
               title: '${strings.chipsIn} ${packState.selectedPack}',
               icon: Icons.memory,
               subtitle: '${packState.availableChips.length} ${strings.chips}',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class LogEntry {
   final DateTime timestamp;
@@ -32,10 +33,24 @@ class LogConsole extends StatelessWidget {
     }
   }
 
+  IconData _getIcon(LogLevel level) {
+    switch (level) {
+      case LogLevel.info:
+        return Icons.info_outline;
+      case LogLevel.success:
+        return Icons.check_circle_outline;
+      case LogLevel.warning:
+        return Icons.warning_amber_outlined;
+      case LogLevel.error:
+        return Icons.error_outline;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final monoFamily = AppTheme.monoFamily(context);
 
     return Container(
       decoration: BoxDecoration(
@@ -51,31 +66,38 @@ class LogConsole extends StatelessWidget {
               '${entry.timestamp.hour.toString().padLeft(2, '0')}:'
               '${entry.timestamp.minute.toString().padLeft(2, '0')}:'
               '${entry.timestamp.second.toString().padLeft(2, '0')}';
+          final color = _getColor(entry.level, theme.brightness);
 
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 1),
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: '[$timeStr] ',
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Level icon
+                Icon(_getIcon(entry.level), size: 14, color: color),
+                const SizedBox(width: 4),
+                // Timestamp
+                Text(
+                  '[$timeStr] ',
+                  style: TextStyle(
+                    color: _getColor(LogLevel.info, theme.brightness)
+                        .withValues(alpha: 0.5),
+                    fontFamily: monoFamily,
+                    fontSize: 13,
+                  ),
+                ),
+                // Message
+                Expanded(
+                  child: Text(
+                    entry.message,
                     style: TextStyle(
-                      color: _getColor(LogLevel.info, theme.brightness)
-                          .withValues(alpha: 0.5),
-                      fontFamily: 'monospace',
+                      color: color,
+                      fontFamily: monoFamily,
                       fontSize: 13,
                     ),
                   ),
-                  TextSpan(
-                    text: entry.message,
-                    style: TextStyle(
-                      color: _getColor(entry.level, theme.brightness),
-                      fontFamily: 'monospace',
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         },

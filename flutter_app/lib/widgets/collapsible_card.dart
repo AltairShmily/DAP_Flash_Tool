@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class CollapsibleCard extends StatefulWidget {
   final String title;
@@ -6,6 +7,7 @@ class CollapsibleCard extends StatefulWidget {
   final Widget child;
   final bool initiallyExpanded;
   final IconData? icon;
+  final int index; // for staggered animation delay
 
   const CollapsibleCard({
     super.key,
@@ -14,6 +16,7 @@ class CollapsibleCard extends StatefulWidget {
     required this.child,
     this.initiallyExpanded = true,
     this.icon,
+    this.index = 0,
   });
 
   @override
@@ -118,6 +121,17 @@ class _CollapsibleCardState extends State<CollapsibleCard>
           ),
         ],
       ),
-    );
+    )
+        .animate()
+        .fadeIn(
+          duration: 300.ms,
+          delay: (widget.index * 60).ms,
+        )
+        .slideY(
+          begin: 0.06,
+          duration: 300.ms,
+          delay: (widget.index * 60).ms,
+          curve: Curves.easeOutCubic,
+        );
   }
 }
