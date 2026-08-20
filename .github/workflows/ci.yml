@@ -161,16 +161,7 @@ jobs:
             --dart_out=grpc:flutter_app/lib/proto \
             proto/dap_flash.proto
 
-      - name: Generate Windows platform files
-        shell: bash
-        run: |
-          rm -rf flutter_app/windows
-          cd flutter_app && flutter create --platforms=windows .
-
-      - name: Patch bitsdojo_window into Windows runner
-        working-directory: flutter_app
-        shell: bash
-        run: dart run bitsdojo_window:setup_windows
+      # Windows 平台文件已提交（含 bitsdojo_window main.cpp 配置），无需重新生成
 
       - name: Install dependencies
         working-directory: flutter_app
