@@ -372,7 +372,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final isScanning = deviceState.isScanning;
     final isConnected = deviceState.isConnected;
 
-    return CollapsibleCard(
+    return CollapsibleCard(index: 0,
       title: strings.connectionStatus,
       icon: Icons.usb,
       initiallyExpanded: true,
@@ -487,7 +487,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final isFlashing = flashState.isOperating;
     final canFlash = deviceState.isConnected && !isFlashing;
 
-    return CollapsibleCard(
+    return CollapsibleCard(index: 1,
       title: strings.operation,
       icon: Icons.flash_on,
       initiallyExpanded: true,
@@ -630,7 +630,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   // ── Speed Test Card ─────────────────────────────────────────────────────────────
   Widget _buildSpeedTestCard(ThemeData theme, AppStrings strings, FlashState flashState) {
     final hasSpeed = flashState.speedText != null;
-    return CollapsibleCard(
+    return CollapsibleCard(index: 2,
       title: strings.speedTest,
       icon: Icons.speed,
       initiallyExpanded: false,
