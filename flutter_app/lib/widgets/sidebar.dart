@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iconsax/iconsax.dart';
 
 enum NavItem {
-  device(Icons.usb, 'Device', '设备'),
-  flash(Icons.flash_on, 'Flash', '烧录'),
-  pack(Icons.inventory_2, 'Packs', 'Pack'),
-  history(Icons.history, 'History', '历史'),
-  settings(Icons.settings, 'Settings', '设置');
+  device(Iconsax.cpu, Iconsax.cpu5, 'Device', '设备'),
+  flash(Iconsax.flash_1, Iconsax.flash_15, 'Flash', '烧录'),
+  pack(Iconsax.box, Iconsax.box5, 'Packs', 'Pack'),
+  history(Iconsax.clock, Iconsax.clock5, 'History', '历史'),
+  settings(Iconsax.setting_2, Iconsax.setting_25, 'Settings', '设置');
 
   final IconData icon;
+  final IconData selectedIcon;
   final String labelEn;
   final String labelZh;
-  const NavItem(this.icon, this.labelEn, this.labelZh);
+  const NavItem(this.icon, this.selectedIcon, this.labelEn, this.labelZh);
 
   String labelFor(String languageCode) {
     return languageCode == 'zh' ? labelZh : labelEn;
@@ -67,7 +69,7 @@ class AppSidebar extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          item.icon,
+                          isSelected ? item.selectedIcon : item.icon,
                           size: 24,
                           color: isSelected
                               ? colorScheme.onPrimaryContainer
@@ -78,6 +80,7 @@ class AppSidebar extends ConsumerWidget {
                           label,
                           style: TextStyle(
                             fontSize: 10,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                             color: isSelected
                                 ? colorScheme.onPrimaryContainer
                                 : colorScheme.onSurfaceVariant,

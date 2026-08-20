@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pluto_grid/pluto_grid.dart';
+import 'package:iconsax/iconsax.dart';
 import '../l10n/app_strings.dart';
 import '../providers/history_provider.dart';
 
@@ -32,12 +34,6 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
     }).toList();
   }
 
-  String _formatFileSize(String path) {
-    // Extract just the filename for display
-    final parts = path.split(RegExp(r'[/\\]'));
-    return parts.isNotEmpty ? parts.last : path;
-  }
-
   String _formatTimestamp(DateTime ts) {
     return '${ts.year}-${ts.month.toString().padLeft(2, '0')}-${ts.day.toString().padLeft(2, '0')} '
         '${ts.hour.toString().padLeft(2, '0')}:${ts.minute.toString().padLeft(2, '0')}';
@@ -46,6 +42,11 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
   String _formatDuration(int ms) {
     if (ms < 1000) return '$ms ms';
     return '${(ms / 1000).toStringAsFixed(1)} s';
+  }
+
+  String _fileName(String path) {
+    final parts = path.split(RegExp(r'[/\\]'));
+    return parts.isNotEmpty ? parts.last : path;
   }
 
   @override
@@ -65,10 +66,10 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
             controller: _searchController,
             decoration: InputDecoration(
               hintText: strings.searchHistory,
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: const Icon(Iconsax.search_normal, size: 20),
               suffixIcon: _searchQuery.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear),
+                      icon: const Icon(Iconsax.close_circle, size: 18),
                       onPressed: () {
                         _searchController.clear();
                         setState(() => _searchQuery = '');
@@ -82,20 +83,59 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
           ),
         ),
 
+        // ── Summary chips ──
+        if (records.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Row(
+              children: [
+                _summaryChip(
+                  '${records.length} ${strings.recordsStored}',
+                  Iconsax.document,
+                  cs.primary,
+                ),
+                const SizedBox(width: 8),
+                _summaryChip(
+                  '${records.where((r) => r.success).length} ${strings.flashSuccess}',
+                  Iconsax.tick_circle,
+                  Colors.green,
+                ),
+                const SizedBox(width: 8),
+                _summaryChip(
+                  '${records.where((r) => !r.success).length} ${strings.flashFailed}',
+                  Iconsax.close_circle,
+                  cs.error,
+                ),
+              ],
+            ),
+          ),
+
         // ── Content ──
         Expanded(
           child: filtered.isEmpty
               ? _buildEmptyState(theme, cs, strings)
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) {
-                    final record = filtered[index];
-                    return _buildRecordCard(record, theme, cs, strings, records);
-                  },
-                ),
+              : _buildGrid(filtered, theme, cs, strings),
         ),
       ],
+    );
+  }
+
+  Widget _summaryChip(String label, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 4),
+          Text(label, style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w500)),
+        ],
+      ),
     );
   }
 
@@ -104,201 +144,137 @@ class _HistoryPageState extends ConsumerState<HistoryPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.history,
-            size: 64,
-            color: cs.outline.withValues(alpha: 0.5),
-          ),
+          Icon(Iconsax.clock, size: 64, color: cs.outline.withValues(alpha: 0.5)),
           const SizedBox(height: 16),
           Text(
-            _searchQuery.isEmpty
-                ? strings.noProbesFound // reuse: "No items found"
-                : strings.noResults,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: cs.outline,
-            ),
+            _searchQuery.isEmpty ? strings.noHistory : strings.noResults,
+            style: theme.textTheme.titleMedium?.copyWith(color: cs.outline),
           ),
           const SizedBox(height: 8),
           Text(
-            _searchQuery.isEmpty
-                ? strings.flashHistory
-                : strings.tryDifferentSearch,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: cs.outline,
-            ),
+            _searchQuery.isEmpty ? strings.noHistoryHint : strings.tryDifferentSearch,
+            style: theme.textTheme.bodySmall?.copyWith(color: cs.outline),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildRecordCard(
-    FlashRecord record,
+  Widget _buildGrid(
+    List<FlashRecord> records,
     ThemeData theme,
     ColorScheme cs,
     AppStrings strings,
-    List<FlashRecord> allRecords,
   ) {
-    final fileName = _formatFileSize(record.firmwarePath);
-
-    return Dismissible(
-      key: ValueKey(record.timestamp.toIso8601String() + record.firmwarePath),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 16),
-        decoration: BoxDecoration(
-          color: cs.errorContainer,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(Icons.delete_outline, color: cs.onErrorContainer),
-      ),
-      confirmDismiss: (direction) async {
-        final index = allRecords.indexOf(record);
-        ref.read(historyProvider.notifier).removeRecordAt(index);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(strings.recordDeleted),
-              action: SnackBarAction(
-                label: strings.undo,
-                onPressed: () {
-                  ref.read(historyProvider.notifier).insertRecord(index, record);
-                },
-              ),
-            ),
+    final columns = [
+      PlutoColumn(
+        title: '',
+        field: 'status',
+        type: PlutoColumnType.text(),
+        width: 40,
+        minWidth: 40,
+        enableSorting: false,
+        enableColumnDrag: false,
+        enableContextMenu: false,
+        renderer: (rendererContext) {
+          final success = rendererContext.cell.value == 'ok';
+          return Icon(
+            success ? Iconsax.tick_circle5 : Iconsax.close_circle5,
+            size: 18,
+            color: success ? Colors.green : cs.error,
           );
+        },
+      ),
+      PlutoColumn(
+        title: strings.firmwareFile,
+        field: 'file',
+        type: PlutoColumnType.text(),
+        minWidth: 160,
+        enableEditingMode: false,
+      ),
+      PlutoColumn(
+        title: strings.chipName,
+        field: 'chip',
+        type: PlutoColumnType.text(),
+        width: 120,
+        enableEditingMode: false,
+        renderer: (ctx) {
+          final v = ctx.cell.value as String;
+          return Text(v.isEmpty ? '—' : v, style: const TextStyle(fontFamily: 'monospace', fontSize: 12));
+        },
+      ),
+      PlutoColumn(
+        title: 'Probe',
+        field: 'probe',
+        type: PlutoColumnType.text(),
+        width: 100,
+        enableEditingMode: false,
+        renderer: (ctx) {
+          final v = ctx.cell.value as String;
+          return Text(v.isEmpty ? '—' : v, style: const TextStyle(fontFamily: 'monospace', fontSize: 12));
+        },
+      ),
+      PlutoColumn(
+        title: strings.duration,
+        field: 'duration',
+        type: PlutoColumnType.text(),
+        width: 80,
+        enableEditingMode: false,
+        textAlign: PlutoColumnTextAlign.right,
+      ),
+      PlutoColumn(
+        title: 'Time',
+        field: 'time',
+        type: PlutoColumnType.text(),
+        width: 140,
+        enableEditingMode: false,
+        renderer: (ctx) {
+          return Text(
+            ctx.cell.value as String,
+            style: TextStyle(fontSize: 12, color: cs.outline),
+          );
+        },
+      ),
+    ];
+
+    final rows = records.map((r) {
+      return PlutoRow(cells: {
+        'status': PlutoCell(value: r.success ? 'ok' : 'fail'),
+        'file': PlutoCell(value: _fileName(r.firmwarePath)),
+        'chip': PlutoCell(value: r.chipName),
+        'probe': PlutoCell(value: r.probeName),
+        'duration': PlutoCell(value: _formatDuration(r.durationMs)),
+        'time': PlutoCell(value: _formatTimestamp(r.timestamp)),
+      });
+    }).toList();
+
+    return PlutoGrid(
+      columns: columns,
+      rows: rows,
+      onRowDoubleTap: (event) {
+        final idx = event.rowIdx;
+        if (idx < records.length && widget.onReFlash != null) {
+          widget.onReFlash!(records[idx].firmwarePath);
         }
-        return false; // Already handled above
       },
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 8),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () {
-            if (widget.onReFlash != null) {
-              widget.onReFlash!(record.firmwarePath);
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Row 1: filename + status
-                Row(
-                  children: [
-                    Icon(
-                      record.success ? Icons.check_circle : Icons.error_outline,
-                      size: 20,
-                      color: record.success ? Colors.green : cs.error,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        fileName,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: record.success
-                            ? Colors.green.withValues(alpha: 0.15)
-                            : cs.errorContainer,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        record.success ? strings.flashSuccess : strings.flashFailed,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: record.success ? Colors.green : cs.error,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // Row 2: chip + probe
-                Row(
-                  children: [
-                    _tagChip(Icons.memory, record.chipName, theme),
-                    const SizedBox(width: 8),
-                    _tagChip(Icons.usb, record.probeName, theme),
-                  ],
-                ),
-                const SizedBox(height: 4),
-
-                // Row 3: timestamp + duration
-                Row(
-                  children: [
-                    Icon(Icons.schedule, size: 14, color: cs.outline),
-                    const SizedBox(width: 4),
-                    Text(
-                      _formatTimestamp(record.timestamp),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.outline,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Icon(Icons.timer, size: 14, color: cs.outline),
-                    const SizedBox(width: 4),
-                    Text(
-                      _formatDuration(record.durationMs),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.outline,
-                      ),
-                    ),
-                  ],
-                ),
-                if (record.errorMessage != null &&
-                    record.errorMessage!.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: cs.errorContainer.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      record.errorMessage!,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: cs.error,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ],
-            ),
+      configuration: PlutoGridConfiguration(
+        style: PlutoGridStyleConfig(
+          gridBackgroundColor: theme.scaffoldBackgroundColor,
+          rowColor: theme.cardTheme.color ?? cs.surface,
+          activatedColor: cs.primaryContainer,
+          gridBorderColor: cs.outlineVariant.withValues(alpha: 0.3),
+          borderColor: cs.outlineVariant.withValues(alpha: 0.15),
+          iconColor: cs.onSurfaceVariant,
+          columnTextStyle: theme.textTheme.labelMedium!.copyWith(
+            fontWeight: FontWeight.w600,
           ),
+          cellTextStyle: theme.textTheme.bodyMedium!,
+          rowHeight: 36,
+        ),
+        columnSize: const PlutoGridColumnSizeConfig(
+          autoSizeMode: PlutoAutoSizeMode.none,
         ),
       ),
-    );
-  }
-
-  Widget _tagChip(IconData icon, String label, ThemeData theme) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 14, color: theme.colorScheme.outline),
-        const SizedBox(width: 4),
-        Text(
-          label.isEmpty ? '—' : label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontFamily: 'monospace',
-          ),
-        ),
-      ],
     );
   }
 }

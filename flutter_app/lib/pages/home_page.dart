@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:iconsax/iconsax.dart';
 import '../l10n/app_strings.dart';
 import '../providers/flash_provider.dart';
 import '../providers/device_provider.dart' as dev;
@@ -224,35 +225,35 @@ class _HomePageState extends ConsumerState<HomePage> {
               leading: Padding(
                 padding: const EdgeInsets.only(bottom: 16, top: 8),
                 child: Icon(
-                  Icons.flash_on,
+                  Iconsax.flash_15,
                   size: 28,
                   color: theme.colorScheme.primary,
                 ),
               ),
               destinations: [
                 NavigationRailDestination(
-                  icon: const Icon(Icons.home_outlined),
-                  selectedIcon: const Icon(Icons.home),
+                  icon: const Icon(Iconsax.flash_1),
+                  selectedIcon: const Icon(Iconsax.flash_15),
                   label: Text(stringsForLocale.flashPage),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.usb_outlined),
-                  selectedIcon: const Icon(Icons.usb),
+                  icon: const Icon(Iconsax.cpu),
+                  selectedIcon: const Icon(Iconsax.cpu5),
                   label: Text(stringsForLocale.devicePage),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.history_outlined),
-                  selectedIcon: const Icon(Icons.history),
+                  icon: const Icon(Iconsax.clock),
+                  selectedIcon: const Icon(Iconsax.clock5),
                   label: Text(stringsForLocale.historyPage),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.inventory_2_outlined),
-                  selectedIcon: const Icon(Icons.inventory_2),
+                  icon: const Icon(Iconsax.box),
+                  selectedIcon: const Icon(Iconsax.box5),
                   label: Text(stringsForLocale.packPage),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.settings_outlined),
-                  selectedIcon: const Icon(Icons.settings),
+                  icon: const Icon(Iconsax.setting_2),
+                  selectedIcon: const Icon(Iconsax.setting_25),
                   label: Text(stringsForLocale.settingsPage),
                 ),
               ],
