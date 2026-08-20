@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:iconsax/iconsax.dart';
 import '../l10n/app_strings.dart';
+import '../widgets/title_bar.dart';
 import '../providers/flash_provider.dart';
 import '../providers/device_provider.dart' as dev;
 import '../providers/log_provider.dart';
@@ -207,17 +208,23 @@ class _HomePageState extends ConsumerState<HomePage> {
     });
 
     return Scaffold(
-      body: Row(
+      body: Column(
         children: [
-          // ── Navigation Rail ──
-          Container(
-            decoration: BoxDecoration(
-              border: Border(
-                right: BorderSide(
-                  color: theme.dividerColor.withValues(alpha: 0.15),
-                ),
-              ),
-            ),
+          // ── Custom Title Bar ──
+          const AppTitleBar(),
+          // ── Main Body ──
+          Expanded(
+            child: Row(
+              children: [
+                // ── Navigation Rail ──
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      right: BorderSide(
+                        color: theme.dividerColor.withValues(alpha: 0.15),
+                      ),
+                    ),
+                  ),
             child: NavigationRail(
               selectedIndex: _selectedIndex,
               onDestinationSelected: (i) => setState(() => _selectedIndex = i),
@@ -280,9 +287,12 @@ class _HomePageState extends ConsumerState<HomePage> {
               ],
             ),
           ),
-        ],
-      ),
-    );
+        ], // Row children
+      ), // Row
+      ), // Expanded
+      ], // Column children
+      ), // Column
+    ); // Scaffold
   }
 
   // ═══════════════════════════════════════════════════════════════════════════════
