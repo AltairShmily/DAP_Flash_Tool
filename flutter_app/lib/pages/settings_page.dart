@@ -111,6 +111,8 @@ class RuntimeNotifier extends StateNotifier<RuntimeStatus> {
 
   Future<void> check() async {
     state = state.copyWith(isChecking: true);
+    // Ensure mode is resolved (even if we didn't start the backend).
+    await _manager.ensureRunning();
     final connected = await _manager.checkHealth();
     state = RuntimeStatus(
       grpcConnected: connected,

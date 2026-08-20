@@ -32,6 +32,15 @@ class _HomePageState extends ConsumerState<HomePage> {
   String _eraseMode = 'chip';
 
   @override
+  void initState() {
+    super.initState();
+    // Auto-start the backend on first launch.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(backendManagerProvider).ensureRunning();
+    });
+  }
+
+  @override
   void dispose() {
     _firmwarePathController.dispose();
     _targetChipController.dispose();

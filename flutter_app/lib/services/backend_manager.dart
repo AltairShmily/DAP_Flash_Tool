@@ -20,28 +20,49 @@ class BackendManager {
   String? _resolvedPath;
   String? get resolvedPath => _resolvedPath;
 
-  Future<void> start() async {
+  /// Ensure the backend is running. Safe to call multiple times.
+  Future<void> ensureRunning() async {
     if (_isRunning) return;
 
+    // First check if something is already listening on the port.
+    final alreadyAlive = await _probeGrpc();
+    if (alreadyAlive) {
+      _isRunning = true;
+      if (_mode == BackendMode.notFound) {
+        // External backend — resolve mode for display purposes.
+        await _resolveBackend();
+      }
+      return;
+    }
+
+    // Resolve and launch.
     _resolvedPath = await _resolveBackend();
     if (_resolvedPath == null) {
       _mode = BackendMode.notFound;
-      throw Exception(
-        'Backend not found. Install Python 3.9+ with pyocd, '
-        'or place server.exe in the backend/ directory next to the app.',
-      );
+      return; // Don't throw — let the UI show the missing-backend card.
     }
 
-    _process = await _launchBackend(_resolvedPath!);
+    try {
+      _process = await _launchBackend(_resolvedPath!);
+    } catch (e) {
+      _isRunning = false;
+      return;
+    }
+
     _isRunning = true;
 
-    // Wait briefly for the gRPC server to bind.
-    await Future.delayed(const Duration(seconds: 2));
+    // Wait for gRPC to become available (up to 5 s).
+    for (var i = 0; i < 10; i++) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (await _probeGrpc()) return;
+    }
 
-    _process!.exitCode.then((code) {
-      _isRunning = false;
-      print('Backend exited with code: $code');
-    });
+    // If it still isn't up, check if the process exited.
+    if (_process != null) {
+      _process!.exitCode.then((code) {
+        _isRunning = false;
+      });
+    }
   }
 
   /// Resolve which backend to launch and how.
@@ -84,15 +105,22 @@ class BackendManager {
     final sep = Platform.pathSeparator;
 
     if (_mode == BackendMode.bundled) {
-      // Standalone exe — no script argument needed
-      return Process.start(path, ['50051'],
-          mode: ProcessStartMode.inheritStdio);
+      // Standalone exe — detached to avoid a visible console window.
+      return Process.start(
+        path,
+        ['50051'],
+        mode: ProcessStartMode.detached,
+      );
     }
 
-    // Python modes — need server.py as argument
+    // Python modes — need server.py as argument.
+    // Keep inheritStdio so dev-mode errors are visible.
     final script = '..${sep}backend${sep}server.py';
-    return Process.start(path, [script, '50051'],
-        mode: ProcessStartMode.inheritStdio);
+    return Process.start(
+      path,
+      [script, '50051'],
+      mode: ProcessStartMode.inheritStdio,
+    );
   }
 
   Future<void> stop() async {
@@ -104,6 +132,19 @@ class BackendManager {
     }
   }
 
+  /// Quick TCP probe to see if gRPC port is already open.
+  Future<bool> _probeGrpc() async {
+    try {
+      final socket = await Socket.connect('127.0.0.1', 50051,
+          timeout: const Duration(seconds: 1));
+      socket.destroy();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Full gRPC health check (used by the settings page).
   Future<bool> checkHealth() async {
     try {
       return await GrpcClient.instance.checkConnection();
