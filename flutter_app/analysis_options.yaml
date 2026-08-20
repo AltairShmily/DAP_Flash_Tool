@@ -4,6 +4,13 @@ analyzer:
     - "lib/services/grpc_client.dart"
     - "lib/services/device_service.dart"
     - "lib/services/flash_service.dart"
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
   errors:
     deprecated_member_use: info
     uri_does_not_exist: ignore
