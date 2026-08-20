@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  FLUTTER_VERSION: '3.32.x'
+  FLUTTER_VERSION: '3.47.x'
   PYTHON_VERSION: '3.11'
 
 jobs:
@@ -46,9 +46,10 @@ jobs:
         working-directory: backend
         run: |
           python test_import.py
-          python test_drivers.py
           python test_parsers.py
           python test_pack.py
+          pip install pytest
+          pytest test_drivers.py -v
 
       - name: Verify server starts
         working-directory: backend
@@ -73,7 +74,7 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq protobuf-compiler
 
       - name: Install protoc Dart plugin
-        run: dart pub global activate protoc_plugin 21.1.2
+        run: dart pub global activate protoc_plugin 22.5.0
 
       - name: Generate Dart proto stubs
         run: |
@@ -123,7 +124,7 @@ jobs:
 
       - name: Install protoc Dart plugin
         shell: bash
-        run: dart pub global activate protoc_plugin 21.1.2
+        run: dart pub global activate protoc_plugin 22.5.0
 
       # ── Python backend: generate gRPC + build standalone exe ──
       - name: Install Python dependencies

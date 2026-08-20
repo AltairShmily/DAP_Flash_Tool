@@ -5,6 +5,7 @@ import struct
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'proto'))
 
 from parsers.hex_parser import parse_hex
 from parsers.elf_parser import parse_elf

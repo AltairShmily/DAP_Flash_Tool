@@ -5,6 +5,7 @@ import tempfile
 import zipfile
 
 sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'proto'))
 
 from pack import ChipDefinition, PackInfo
 from pack.pack_manager import PackManager
