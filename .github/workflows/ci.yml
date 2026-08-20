@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'feat/**']
   pull_request:
     branches: [main]
 
@@ -39,7 +39,6 @@ jobs:
             --grpc_python_out=backend/proto \
             proto/dap_flash.proto
           touch backend/proto/__init__.py
-          # Fix relative import in generated gRPC code
           sed -i 's/^import dap_flash_pb2/from . import dap_flash_pb2/' backend/proto/dap_flash_pb2_grpc.py
 
       - name: Run tests
@@ -56,9 +55,9 @@ jobs:
         run: |
           timeout 5 python server.py || true
 
-  # ─── Flutter 分析与测试 ───
+  # ─── Flutter 分析 + Linux 构建 ───
   flutter-analyze:
-    name: Flutter Analyze
+    name: Flutter Analyze + Linux Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -95,6 +94,10 @@ jobs:
       - name: Run tests
         working-directory: flutter_app
         run: flutter test
+
+      - name: Build Linux
+        working-directory: flutter_app
+        run: flutter build linux --release
 
   # ─── Windows 构建（含 PyInstaller 后端打包） ───
   build-windows:
@@ -164,6 +167,11 @@ jobs:
           rm -rf flutter_app/windows
           cd flutter_app && flutter create --platforms=windows .
 
+      - name: Patch bitsdojo_window into Windows runner
+        working-directory: flutter_app
+        shell: bash
+        run: dart run bitsdojo_window:setup_windows
+
       - name: Install dependencies
         working-directory: flutter_app
         run: flutter pub get
@@ -177,9 +185,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p dist
-          # Flutter app
           cp -r flutter_app/build/windows/x64/runner/Release/* dist/
-          # Standalone backend exe → dist/backend/server.exe
           mkdir -p dist/backend
           cp backend/dist/server.exe dist/backend/server.exe
           echo "Distribution assembled:"

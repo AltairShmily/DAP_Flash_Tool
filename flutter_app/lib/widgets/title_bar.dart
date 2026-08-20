@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 
 class AppTitleBar extends StatelessWidget {
   final String title;
@@ -24,7 +24,6 @@ class AppTitleBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // ── App icon + title ──
           const SizedBox(width: 12),
           Icon(Iconsax.flash_15, size: 16, color: cs.primary),
           const SizedBox(width: 8),
@@ -35,53 +34,34 @@ class AppTitleBar extends StatelessWidget {
               color: cs.onSurfaceVariant,
             ),
           ),
-
-          // ── Drag area ──
+          // Drag area
           Expanded(
             child: MoveWindow(
               child: Container(color: Colors.transparent),
             ),
           ),
-
-          // ── Window buttons ──
-          _WindowButtons(cs: cs),
+          // Window buttons
+          _WindowButton(
+            icon: Iconsax.minus_cirlce,
+            color: cs.onSurfaceVariant,
+            onTap: () => appWindow.minimize(),
+          ),
+          _WindowButton(
+            icon: appWindow.isMaximized ? Iconsax.maximize_1 : Iconsax.maximize,
+            color: cs.onSurfaceVariant,
+            onTap: () {
+              appWindow.isMaximized
+                  ? appWindow.restore()
+                  : appWindow.maximize();
+            },
+          ),
+          _WindowButton(
+            icon: Iconsax.close_circle,
+            color: cs.error,
+            onTap: () => appWindow.close(),
+          ),
         ],
       ),
-    );
-  }
-}
-
-class _WindowButtons extends StatelessWidget {
-  final ColorScheme cs;
-  const _WindowButtons({required this.cs});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Minimize
-        _WindowButton(
-          icon: Iconsax.minus_cirlce,
-          color: cs.onSurfaceVariant,
-          onTap: () => appWindow.minimize(),
-        ),
-        // Maximize / Restore
-        _WindowButton(
-          icon: appWindow.isMaximized ? Iconsax.maximize_1 : Iconsax.maximize,
-          color: cs.onSurfaceVariant,
-          onTap: () {
-            appWindow.isMaximized
-                ? appWindow.restore()
-                : appWindow.maximize();
-          },
-        ),
-        // Close
-        _WindowButton(
-          icon: Iconsax.close_circle,
-          color: cs.error,
-          onTap: () => appWindow.close(),
-        ),
-      ],
     );
   }
 }
