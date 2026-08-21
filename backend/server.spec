@@ -36,7 +36,6 @@ a = Analysis(
         'pyocd.flash.eraser',
         'intelhex',
         'elftools',
-        'pyelftools',
     ],
     hookspath=[],
     hooksconfig={},
