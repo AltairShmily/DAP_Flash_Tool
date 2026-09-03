@@ -11,8 +11,10 @@ import 'grpc_client.dart';
 class BackendManager {
   Process? _process;
   bool _isRunning = false;
+  String? _lastError;
 
   bool get isRunning => _isRunning;
+  String? get lastError => _lastError;
 
   /// Detected backend mode — useful for the settings page.
   BackendMode _mode = BackendMode.notFound;
@@ -21,48 +23,68 @@ class BackendManager {
   String? get resolvedPath => _resolvedPath;
 
   /// Ensure the backend is running. Safe to call multiple times.
-  Future<void> ensureRunning() async {
-    if (_isRunning) return;
+  /// Returns true if the backend is ready (or was already running).
+  Future<bool> ensureRunning() async {
+    if (_isRunning) {
+      // Double-check: is the port actually open?
+      if (await _probeGrpc()) return true;
+      // Stale state — reset and try again.
+      _isRunning = false;
+    }
+
+    _lastError = null;
 
     // First check if something is already listening on the port.
     final alreadyAlive = await _probeGrpc();
     if (alreadyAlive) {
       _isRunning = true;
       if (_mode == BackendMode.notFound) {
-        // External backend — resolve mode for display purposes.
         await _resolveBackend();
       }
-      return;
+      return true;
     }
 
     // Resolve and launch.
     _resolvedPath = await _resolveBackend();
     if (_resolvedPath == null) {
       _mode = BackendMode.notFound;
-      return; // Don't throw — let the UI show the missing-backend card.
+      _lastError = 'Backend not found. Install Python 3.9+ or place server.exe in backend/.';
+      return false;
     }
 
     try {
       _process = await _launchBackend(_resolvedPath!);
     } catch (e) {
       _isRunning = false;
-      return;
+      _lastError = 'Failed to start backend: $e';
+      return false;
     }
 
-    _isRunning = true;
-
-    // Wait for gRPC to become available (up to 5 s).
-    for (var i = 0; i < 10; i++) {
+    // Wait for gRPC to become available (up to 8 s).
+    for (var i = 0; i < 16; i++) {
       await Future.delayed(const Duration(milliseconds: 500));
-      if (await _probeGrpc()) return;
+      if (await _probeGrpc()) {
+        _isRunning = true;
+        // Reset the gRPC channel so the first real RPC goes through a fresh connection.
+        GrpcClient.instance.reset();
+        return true;
+      }
     }
 
-    // If it still isn't up, check if the process exited.
+    // Timeout — check if the process exited.
+    _isRunning = false;
     if (_process != null) {
-      _process!.exitCode.then((code) {
-        _isRunning = false;
-      });
+      try {
+        final exitCode = await _process!.exitCode.timeout(
+          const Duration(seconds: 1),
+          onTimeout: () => -1,
+        );
+        _lastError = 'Backend process exited with code $exitCode within startup timeout.';
+      } catch (_) {
+        _lastError = 'Backend did not respond on port 50051 within 8 seconds.';
+      }
     }
+    return false;
   }
 
   /// Resolve which backend to launch and how.
@@ -105,7 +127,6 @@ class BackendManager {
     final sep = Platform.pathSeparator;
 
     if (_mode == BackendMode.bundled) {
-      // Standalone exe — detached to avoid a visible console window.
       return Process.start(
         path,
         ['50051'],
@@ -114,7 +135,6 @@ class BackendManager {
     }
 
     // Python modes — need server.py as argument.
-    // Keep inheritStdio so dev-mode errors are visible.
     final script = '..${sep}backend${sep}server.py';
     return Process.start(
       path,
@@ -129,6 +149,7 @@ class BackendManager {
       await _process!.exitCode;
       _process = null;
       _isRunning = false;
+      GrpcClient.instance.reset();
     }
   }
 
@@ -156,15 +177,8 @@ class BackendManager {
 
 /// How the backend was resolved — displayed in the settings page.
 enum BackendMode {
-  /// PyInstaller standalone exe bundled with the app.
   bundled,
-
-  /// Python from a virtualenv (dev mode).
   venv,
-
-  /// System python on PATH (fallback).
   systemPython,
-
-  /// No backend found at all.
   notFound,
 }

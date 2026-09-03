@@ -82,22 +82,27 @@ class RuntimeStatus {
   final bool grpcConnected;
   final BackendMode backendMode;
   final bool isChecking;
+  final String? errorMessage;
 
   const RuntimeStatus({
     this.grpcConnected = false,
     this.backendMode = BackendMode.notFound,
     this.isChecking = false,
+    this.errorMessage,
   });
 
   RuntimeStatus copyWith({
     bool? grpcConnected,
     BackendMode? backendMode,
     bool? isChecking,
+    String? errorMessage,
+    bool clearError = false,
   }) {
     return RuntimeStatus(
       grpcConnected: grpcConnected ?? this.grpcConnected,
       backendMode: backendMode ?? this.backendMode,
       isChecking: isChecking ?? this.isChecking,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 }
@@ -110,14 +115,14 @@ class RuntimeNotifier extends StateNotifier<RuntimeStatus> {
   }
 
   Future<void> check() async {
-    state = state.copyWith(isChecking: true);
-    // Ensure mode is resolved (even if we didn't start the backend).
-    await _manager.ensureRunning();
-    final connected = await _manager.checkHealth();
+    state = state.copyWith(isChecking: true, clearError: true);
+    final ok = await _manager.ensureRunning();
+    final connected = ok ? await _manager.checkHealth() : false;
     state = RuntimeStatus(
       grpcConnected: connected,
       backendMode: _manager.mode,
       isChecking: false,
+      errorMessage: ok ? null : (_manager.lastError ?? 'Backend not responding'),
     );
   }
 }
@@ -194,6 +199,31 @@ class SettingsPage extends ConsumerWidget {
                     label: Text(strings.checkEnvironment),
                   ),
                 ),
+                // Error message from backend startup
+                if (runtime.errorMessage != null) ...[
+                  const SizedBox(height: 12),
+                  Card(
+                    color: theme.colorScheme.errorContainer,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error_outline,
+                              color: theme.colorScheme.error, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              runtime.errorMessage!,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onErrorContainer,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
                 if (runtime.backendMode == BackendMode.notFound) ...[
                   const SizedBox(height: 12),
                   Card(

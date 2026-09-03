@@ -35,8 +35,18 @@ class _HomePageState extends ConsumerState<HomePage> {
   void initState() {
     super.initState();
     // Auto-start the backend on first launch.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(backendManagerProvider).ensureRunning();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final ok = await ref.read(backendManagerProvider).ensureRunning();
+      if (!ok && mounted) {
+        final mgr = ref.read(backendManagerProvider);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(mgr.lastError ?? 'Backend failed to start'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            duration: const Duration(seconds: 6),
+          ),
+        );
+      }
     });
   }
 
