@@ -1,8 +1,10 @@
 pyocd>=0.36.0
-# Pinned: generated proto code embeds these versions — CI verifies sync via
-# git diff, so drifting generator versions would cause spurious mismatches.
-grpcio~=1.83.0
-grpcio-tools~=1.83.0
+# Pinned EXACTLY: generated proto code embeds the generator version
+# (GRPC_GENERATED_VERSION) — CI verifies sync via git diff, so any drift
+# (e.g. 1.83.0 -> 1.83.1) fails the check. Bump these together with a
+# proto regeneration commit.
+grpcio==1.83.0
+grpcio-tools==1.83.0
 protobuf>=7.35,<8
 intelhex>=2.3.0
 pyelftools>=0.30.0
