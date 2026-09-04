@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
+import '../l10n/app_strings.dart';
 import '../services/file_service.dart';
 
 class FirmwarePreviewPage extends ConsumerStatefulWidget {
-  const FirmwarePreviewPage({super.key});
+  /// Optional firmware path to preview immediately (e.g. from the flash page).
+  final String? initialPath;
+
+  const FirmwarePreviewPage({super.key, this.initialPath});
 
   @override
   ConsumerState<FirmwarePreviewPage> createState() => _FirmwarePreviewPageState();
@@ -22,13 +26,25 @@ class _FirmwarePreviewPageState extends ConsumerState<FirmwarePreviewPage> {
   final FileService _fileService = FileService();
 
   @override
+  void initState() {
+    super.initState();
+    final initial = widget.initialPath;
+    if (initial != null && initial.isNotEmpty) {
+      _filePath = initial;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _loadPreview());
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final strings = AppStrings.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('固件预览'),
+        title: Text(strings.previewTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.file_open),
+            tooltip: strings.selectFirmware,
             onPressed: _pickFile,
           ),
         ],
@@ -41,10 +57,12 @@ class _FirmwarePreviewPageState extends ConsumerState<FirmwarePreviewPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('文件: $_filePath'),
+                  Text('${strings.fileLabel}: $_filePath'),
                   if (_fileFormat.isNotEmpty)
                     Text(
-                      '格式: $_fileFormat  |  大小: $_totalSize 字节  |  偏移: 0x${_offset.toRadixString(16).toUpperCase()}',
+                      '${strings.formatLabel}: $_fileFormat  |  '
+                      '${strings.sizeLabel}: $_totalSize  |  '
+                      '${strings.offsetLabel}: 0x${_offset.toRadixString(16).toUpperCase()}',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                 ],
@@ -89,16 +107,16 @@ class _FirmwarePreviewPageState extends ConsumerState<FirmwarePreviewPage> {
                 children: [
                   ElevatedButton(
                     onPressed: _offset > 0 ? _previousPage : null,
-                    child: const Text('上一页'),
+                    child: Text(strings.prevPage),
                   ),
                   const SizedBox(width: 16),
-                  Text('偏移: 0x${_offset.toRadixString(16).toUpperCase()}'),
+                  Text('${strings.offsetLabel}: 0x${_offset.toRadixString(16).toUpperCase()}'),
                   const SizedBox(width: 16),
                   ElevatedButton(
                     onPressed: _totalSize > 0 && _offset + _length < _totalSize
                         ? _nextPage
                         : null,
-                    child: const Text('下一页'),
+                    child: Text(strings.nextPage),
                   ),
                 ],
               ),
@@ -111,9 +129,9 @@ class _FirmwarePreviewPageState extends ConsumerState<FirmwarePreviewPage> {
   Future<void> _pickFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['hex', 'bin'],
+      allowedExtensions: ['hex', 'bin', 'elf'],
     );
-    if (result != null) {
+    if (result != null && result.files.isNotEmpty) {
       final file = result.files.first;
       setState(() {
         _filePath = file.path;
@@ -138,6 +156,7 @@ class _FirmwarePreviewPageState extends ConsumerState<FirmwarePreviewPage> {
         offset: _offset,
         length: _length,
       );
+      if (!mounted) return;
       setState(() {
         _hexDump = preview.hexDump;
         _totalSize = preview.totalSize.toInt();
@@ -145,8 +164,9 @@ class _FirmwarePreviewPageState extends ConsumerState<FirmwarePreviewPage> {
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _errorMessage = '加载失败: $e';
+        _errorMessage = '${AppStrings.of(context).loadFailed}: $e';
         _hexDump = '';
         _isLoading = false;
       });

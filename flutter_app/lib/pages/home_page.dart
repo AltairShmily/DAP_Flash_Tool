@@ -9,10 +9,12 @@ import '../providers/flash_provider.dart';
 import '../providers/device_provider.dart' as dev;
 import '../providers/log_provider.dart';
 import '../providers/history_provider.dart';
+import '../services/backend_manager.dart';
 import '../widgets/collapsible_card.dart';
 import '../widgets/progress_bar.dart';
 import '../widgets/log_console.dart';
 import 'device_page.dart';
+import 'firmware_preview_page.dart';
 import 'history_page.dart';
 import 'pack_page.dart';
 import 'settings_page.dart';
@@ -29,6 +31,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   final _firmwarePathController = TextEditingController();
   final _targetChipController = TextEditingController(text: 'STM32F103C8');
   final _startAddressController = TextEditingController(text: '0x08000000');
+  final _eraseLengthController = TextEditingController(text: '0x400');
   String _eraseMode = 'chip';
 
   @override
@@ -36,12 +39,14 @@ class _HomePageState extends ConsumerState<HomePage> {
     super.initState();
     // Auto-start the backend on first launch.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Apply persisted defaults (frequency/protocol) before any connection.
+      applySettingsToDevice(ref);
       final ok = await ref.read(backendManagerProvider).ensureRunning();
       if (!ok && mounted) {
         final mgr = ref.read(backendManagerProvider);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(mgr.lastError ?? 'Backend failed to start'),
+            content: Text(mgr.lastError ?? AppStrings.of(context).backendStartFailed),
             backgroundColor: Theme.of(context).colorScheme.error,
             duration: const Duration(seconds: 6),
           ),
@@ -55,32 +60,37 @@ class _HomePageState extends ConsumerState<HomePage> {
     _firmwarePathController.dispose();
     _targetChipController.dispose();
     _startAddressController.dispose();
+    _eraseLengthController.dispose();
     super.dispose();
+  }
+
+  /// Parse an address/length input as hex — with or without the 0x prefix
+  /// (embedded convention). Never falls back to decimal, which previously
+  /// turned "08000000" into 8,000,000 (0x7A1200).
+  static int _parseHex(String text, {int defaultValue = 0}) {
+    var t = text.trim();
+    if (t.isEmpty) return defaultValue;
+    if (t.startsWith('0x') || t.startsWith('0X')) t = t.substring(2);
+    return int.tryParse(t, radix: 16) ?? defaultValue;
   }
 
   Future<void> _pickFirmware() async {
     final result = await FilePicker.platform.pickFiles(
       dialogTitle: 'Select Firmware',
       type: FileType.custom,
-      allowedExtensions: ['bin', 'hex', 'elf', 'uf2'],
+      allowedExtensions: ['bin', 'hex', 'elf'],
     );
     if (result != null && result.files.isNotEmpty) {
       final path = result.files.first.path!;
       setState(() {
         _firmwarePathController.text = path;
       });
-      // Set firmware in flash provider
+      final notifier = ref.read(flashProvider.notifier);
       final ext = path.split('.').last.toLowerCase();
-      ref.read(flashProvider.notifier).setFirmware(path, ext);
-      // Parse start address
-      final addrText = _startAddressController.text.trim();
-      int addr = 0x08000000;
-      if (addrText.startsWith('0x') || addrText.startsWith('0X')) {
-        addr = int.tryParse(addrText.substring(2), radix:16) ?? 0x08000000;
-      } else {
-        addr = int.tryParse(addrText) ?? 0x08000000;
-      }
-      ref.read(flashProvider.notifier).setStartAddress(addr);
+      notifier.setFirmware(path, ext);
+      notifier.setStartAddress(
+        _parseHex(_startAddressController.text, defaultValue: 0x08000000),
+      );
     }
   }
 
@@ -88,22 +98,17 @@ class _HomePageState extends ConsumerState<HomePage> {
     final path = _firmwarePathController.text.trim();
     if (path.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a firmware file first')),
+        SnackBar(content: Text(AppStrings.of(context).firmwarePathHint)),
       );
       return;
     }
 
-    // Update firmware and address in provider
+    final notifier = ref.read(flashProvider.notifier);
     final ext = path.split('.').last.toLowerCase();
-    ref.read(flashProvider.notifier).setFirmware(path, ext);
-    final addrText = _startAddressController.text.trim();
-    int addr = 0x08000000;
-    if (addrText.startsWith('0x') || addrText.startsWith('0X')) {
-      addr = int.tryParse(addrText.substring(2), radix: 16) ?? 0x08000000;
-    } else {
-      addr = int.tryParse(addrText) ?? 0x08000000;
-    }
-    ref.read(flashProvider.notifier).setStartAddress(addr);
+    notifier.setFirmware(path, ext);
+    notifier.setStartAddress(
+      _parseHex(_startAddressController.text, defaultValue: 0x08000000),
+    );
 
     final logNotifier = ref.read(logProvider.notifier);
     logNotifier.info('[Flash] Starting flash operation...');
@@ -112,7 +117,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     logNotifier.info('[Flash] Start address: ${_startAddressController.text}');
 
     // Start flash via provider — uses gRPC streaming
-    ref.read(flashProvider.notifier).startFlash(
+    notifier.startFlash(
+      driver: ref.read(settingsProvider).driver,
       onLog: (msg, {bool isError = false}) {
         if (isError) {
           logNotifier.error(msg);
@@ -125,9 +131,21 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   void _startErase() {
     final logNotifier = ref.read(logProvider.notifier);
-    logNotifier.info('[Erase] Starting ${_eraseMode == 'chip' ? 'chip' : 'sector'} erase...');
+    final isSector = _eraseMode == 'sector';
+    final startAddress =
+        _parseHex(_startAddressController.text, defaultValue: 0x08000000);
+    final length = _parseHex(_eraseLengthController.text, defaultValue: 0x400);
+    if (isSector && length <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${AppStrings.of(context).eraseLength}: 0x400')),
+      );
+      return;
+    }
+    logNotifier.info('[Erase] Starting ${isSector ? 'sector' : 'chip'} erase...');
     ref.read(flashProvider.notifier).startErase(
       mode: _eraseMode,
+      startAddress: isSector ? startAddress : 0,
+      length: isSector ? length : 0,
       onLog: (msg, {bool isError = false}) {
         if (isError) {
           logNotifier.error(msg);
@@ -152,7 +170,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   void _showFlashResultDialog(FlashState flashState) {
     final strings = AppStrings.of(context);
-    final isSuccess = !flashState.statusMessage.startsWith('Error');
+    final isSuccess = flashState.success ?? false;
     showDialog(
       context: context,
       builder: (ctx) {
@@ -202,26 +220,16 @@ class _HomePageState extends ConsumerState<HomePage> {
     final deviceState = ref.watch(dev.deviceProvider);
     final logEntries = ref.watch(logProvider);
 
-    // Listen for flash completion
+    // Listen for operation completion
     ref.listen<FlashState>(flashProvider, (prev, next) {
       if (prev?.isOperating == true && !next.isOperating) {
-        // Flash completed (success or error)
         final logNotifier = ref.read(logProvider.notifier);
         logNotifier.info('[Result] ${next.statusMessage}');
-        // Add to history
-        final isSuccess = !next.statusMessage.startsWith('Error');
-        ref.read(historyProvider.notifier).addRecord(
-          FlashRecord(
-            firmwarePath: _firmwarePathController.text,
-            firmwareHash: '',
-            chipName: _targetChipController.text,
-            probeName: deviceState.probeName ?? '',
-            timestamp: DateTime.now(),
-            success: isSuccess,
-            durationMs: 0,
-            errorMessage: isSuccess ? null : next.statusMessage,
-          ),
-        );
+        // Only true flash operations belong in the flash history; the backend
+        // persists hash/chip/probe/duration itself, so just refresh the view.
+        if (next.operationType == FlashOperationType.flash) {
+          ref.read(historyProvider.notifier).refresh();
+        }
         _showFlashResultDialog(next);
       }
     });
@@ -471,6 +479,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           final success = await ref.read(dev.deviceProvider.notifier).connect(
                             probeId: probeId,
                             target: _targetChipController.text,
+                            driver: ref.read(settingsProvider).driver,
                           );
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -543,7 +552,23 @@ class _HomePageState extends ConsumerState<HomePage> {
               IconButton.outlined(
                 onPressed: _pickFirmware,
                 icon: const Icon(Icons.folder_open),
-                tooltip: strings.loadPack,
+                tooltip: strings.selectFirmware,
+              ),
+              const SizedBox(width: 8),
+              IconButton.outlined(
+                onPressed: _firmwarePathController.text.trim().isEmpty
+                    ? null
+                    : () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => FirmwarePreviewPage(
+                              initialPath: _firmwarePathController.text.trim(),
+                            ),
+                          ),
+                        );
+                      },
+                icon: const Icon(Icons.visibility_outlined),
+                tooltip: strings.preview,
               ),
             ],
           ),
@@ -582,6 +607,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               progress: flashState.progress,
               statusText: flashState.statusMessage,
               speedText: flashState.speedText,
+              currentPhase: flashState.phaseIndex,
             ),
             const SizedBox(height: 8),
             if (flashState.totalBytes > 0)
@@ -622,6 +648,20 @@ class _HomePageState extends ConsumerState<HomePage> {
               ),
             ],
           ),
+          // Sector erase needs a range: start address comes from the address
+          // field above, length from this input.
+          if (_eraseMode == 'sector') ...[
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _eraseLengthController,
+              decoration: InputDecoration(
+                labelText: strings.eraseLength,
+                border: const OutlineInputBorder(),
+                isDense: true,
+                helperText: '0x400 = 1 KB',
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
 
           // Action buttons

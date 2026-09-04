@@ -14,6 +14,17 @@ class PackService {
     return response.packs;
   }
 
+  Future<OperationResult> installPack(String packPath) async {
+    return await _client.stub.installPack(InstallPackRequest()..packPath = packPath);
+  }
+
+  Future<List<PackInfo>> scanPacks({String directory = ''}) async {
+    final response = await _client.stub.scanPacks(
+      ScanPacksRequest()..directory = directory,
+    );
+    return response.packs;
+  }
+
   Stream<ProgressUpdate> downloadPack({
     required String packUrl,
     required String packName,

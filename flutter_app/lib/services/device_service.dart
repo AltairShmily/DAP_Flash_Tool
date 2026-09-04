@@ -14,13 +14,15 @@ class DeviceService {
     required String target,
     required int frequency,
     required String protocol,
+    String driver = '',
   }) async {
     return await _client.stub.connectProbe(
       ConnectRequest()
         ..probeId = probeId
         ..target = target
         ..frequency = frequency
-        ..protocol = protocol,
+        ..protocol = protocol
+        ..driver = driver,
     );
   }
 

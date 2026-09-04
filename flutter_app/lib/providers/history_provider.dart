@@ -1,8 +1,7 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
+
+import '../proto/dap_flash.pb.dart' as pb;
+import '../services/history_service.dart';
 
 class FlashRecord {
   final String firmwarePath;
@@ -25,90 +24,50 @@ class FlashRecord {
     this.errorMessage,
   });
 
-  Map<String, dynamic> toJson() => {
-        'firmwarePath': firmwarePath,
-        'firmwareHash': firmwareHash,
-        'chipName': chipName,
-        'probeName': probeName,
-        'timestamp': timestamp.toIso8601String(),
-        'success': success,
-        'durationMs': durationMs,
-        'errorMessage': errorMessage,
-      };
-
-  factory FlashRecord.fromJson(Map<String, dynamic> json) => FlashRecord(
-        firmwarePath: json['firmwarePath'] ?? '',
-        firmwareHash: json['firmwareHash'] ?? '',
-        chipName: json['chipName'] ?? '',
-        probeName: json['probeName'] ?? '',
-        timestamp: DateTime.parse(json['timestamp']),
-        success: json['success'] ?? false,
-        durationMs: json['durationMs'] ?? 0,
-        errorMessage: json['errorMessage'],
+  factory FlashRecord.fromProto(pb.FlashRecord r) => FlashRecord(
+        firmwarePath: r.firmwarePath,
+        firmwareHash: r.firmwareHash,
+        chipName: r.chipName,
+        probeName: r.probeName,
+        timestamp:
+            DateTime.fromMillisecondsSinceEpoch(r.timestamp.toInt() * 1000),
+        success: r.success,
+        durationMs: r.durationMs.toInt(),
+        errorMessage: r.errorMessage.isEmpty ? null : r.errorMessage,
       );
 }
 
+/// History is persisted by the backend (~/.dap_flash_tool/flash_history.json),
+/// which records hash/chip/probe/duration during each flash. The frontend is
+/// a read-through view: refresh() after operations, clearHistory() via RPC.
 class HistoryNotifier extends StateNotifier<List<FlashRecord>> {
-  static const _maxRecords = 100;
+  final HistoryService _service = HistoryService();
 
   HistoryNotifier() : super([]) {
-    _load();
+    refresh();
   }
 
-  Future<String> get _historyPath async {
-    final dir = await getApplicationSupportDirectory();
-    return '${dir.path}${Platform.pathSeparator}history.json';
-  }
-
-  Future<void> _load() async {
+  Future<void> refresh() async {
     try {
-      final path = await _historyPath;
-      final file = File(path);
-      if (await file.exists()) {
-        final content = await file.readAsString();
-        final List<dynamic> json = jsonDecode(content);
-        state = json.map((e) => FlashRecord.fromJson(e)).toList();
+      final records = await _service.getFlashHistory();
+      if (mounted) {
+        state = records.map(FlashRecord.fromProto).toList();
       }
-    } catch (e) {
-      state = [];
+    } catch (_) {
+      // Backend unavailable — keep whatever we already have.
     }
   }
 
-  Future<void> _save() async {
-    final path = await _historyPath;
-    final file = File(path);
-    final json = state.map((e) => e.toJson()).toList();
-    await file.writeAsString(jsonEncode(json));
-  }
-
-  void addRecord(FlashRecord record) {
-    state = [record, ...state];
-    if (state.length > _maxRecords) {
-      state = state.sublist(0, _maxRecords);
+  Future<bool> clearHistory() async {
+    try {
+      final result = await _service.clearFlashHistory();
+      if (result.success && mounted) {
+        state = [];
+      }
+      return result.success;
+    } catch (_) {
+      return false;
     }
-    _save();
-  }
-
-  void clearHistory() {
-    state = [];
-    _save();
-  }
-
-  void removeRecordAt(int index) {
-    state = List.from(state)..removeAt(index);
-    _save();
-  }
-
-  void insertRecord(int index, FlashRecord record) {
-    final newList = List<FlashRecord>.from(state);
-    newList.insert(index, record);
-    state = newList;
-    _save();
-  }
-
-  void replaceRecords(List<FlashRecord> records) {
-    state = records;
-    _save();
   }
 }
 

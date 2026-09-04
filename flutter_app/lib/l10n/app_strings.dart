@@ -52,9 +52,9 @@ class AppStrings {
       'deviceConnected': 'Device Connected',
       // Home page placeholders
       'devicePage': 'Device Management',
-      'packPage': 'Pack Management - Coming Soon',
+      'packPage': 'Packs',
       'historyPage': 'Flash History',
-      'settingsPage': 'Settings - Coming Soon',
+      'settingsPage': 'Settings',
       'deviceConnSettings': 'Connection parameters',
       'logReady': 'Ready — waiting for operation...',
       // Device page
@@ -153,6 +153,7 @@ class AppStrings {
       'clearLog': 'Clear Log',
       'connectionStatus': 'Connection Status',
       'eraseMode': 'Erase Mode',
+      'eraseLength': 'Erase Length',
       'firmwarePathHint': 'Select or enter firmware path',
       'inProgress': 'In Progress...',
       'loadPack': 'Load Pack',
@@ -176,6 +177,30 @@ class AppStrings {
       'environmentError': 'Environment issue detected',
       'packDirectory': 'Pack Directory',
       'language': 'Language',
+      // Reset & driver
+      'softwareReset': 'Software Reset',
+      'hardwareReset': 'Hardware Reset',
+      'openocdExperimental': 'OpenOCD (experimental — incomplete)',
+      // Flash phase short labels
+      'phaseConnect': 'Connect',
+      'phaseErase': 'Erase',
+      'phaseProgram': 'Program',
+      'phaseVerify': 'Verify',
+      'phaseReset': 'Reset',
+      // Pack download
+      'download': 'Download',
+      // Firmware preview
+      'preview': 'Preview',
+      'previewTitle': 'Firmware Preview',
+      'fileLabel': 'File',
+      'formatLabel': 'Format',
+      'sizeLabel': 'Size',
+      'offsetLabel': 'Offset',
+      'prevPage': 'Previous',
+      'nextPage': 'Next',
+      'loadFailed': 'Failed to load',
+      // Backend
+      'backendStartFailed': 'Backend failed to start',
     },
     'zh': {
       'appTitle': 'DAP 烧录工具',
@@ -219,9 +244,9 @@ class AppStrings {
       'deviceConnected': '设备已连接',
       // Home page placeholders
       'devicePage': '设备管理',
-      'packPage': 'Pack 管理 - 即将推出',
+      'packPage': 'Pack 管理',
       'historyPage': '烧录历史',
-      'settingsPage': '设置 - 即将推出',
+      'settingsPage': '设置',
       'deviceConnSettings': '连接参数',
       'logReady': '就绪 — 等待操作...',
       // Device page
@@ -320,6 +345,7 @@ class AppStrings {
       'clearLog': '清除日志',
       'connectionStatus': '连接状态',
       'eraseMode': '擦除模式',
+      'eraseLength': '擦除长度',
       'firmwarePathHint': '选择或输入固件路径',
       'inProgress': '进行中...',
       'loadPack': '加载 Pack',
@@ -343,6 +369,30 @@ class AppStrings {
       'environmentError': '检测到环境问题',
       'packDirectory': 'Pack 目录',
       'language': '语言',
+      // Reset & driver
+      'softwareReset': '软件复位',
+      'hardwareReset': '硬件复位',
+      'openocdExperimental': 'OpenOCD（实验性 — 未完成）',
+      // Flash phase short labels
+      'phaseConnect': '连接',
+      'phaseErase': '擦除',
+      'phaseProgram': '编程',
+      'phaseVerify': '验证',
+      'phaseReset': '复位',
+      // Pack download
+      'download': '下载',
+      // Firmware preview
+      'preview': '预览',
+      'previewTitle': '固件预览',
+      'fileLabel': '文件',
+      'formatLabel': '格式',
+      'sizeLabel': '大小',
+      'offsetLabel': '偏移',
+      'prevPage': '上一页',
+      'nextPage': '下一页',
+      'loadFailed': '加载失败',
+      // Backend
+      'backendStartFailed': '后端启动失败',
     },
   };
 
@@ -452,6 +502,7 @@ class AppStrings {
   String get loadPack => _t('loadPack');
   String get address => _t('address');
   String get eraseMode => _t('eraseMode');
+  String get eraseLength => _t('eraseLength');
   String get inProgress => _t('inProgress');
   String get speedTest => _t('speedTest');
   String get flashPage => _t('flashPage');
@@ -511,6 +562,25 @@ class AppStrings {
   String get statusFlashing => _t('statusFlashing');
   String get statusErasing => _t('statusErasing');
   String get selectChipFirst => _t('selectChipFirst');
+  String get softwareReset => _t('softwareReset');
+  String get hardwareReset => _t('hardwareReset');
+  String get openocdExperimental => _t('openocdExperimental');
+  String get phaseConnect => _t('phaseConnect');
+  String get phaseErase => _t('phaseErase');
+  String get phaseProgram => _t('phaseProgram');
+  String get phaseVerify => _t('phaseVerify');
+  String get phaseReset => _t('phaseReset');
+  String get download => _t('download');
+  String get preview => _t('preview');
+  String get previewTitle => _t('previewTitle');
+  String get fileLabel => _t('fileLabel');
+  String get formatLabel => _t('formatLabel');
+  String get sizeLabel => _t('sizeLabel');
+  String get offsetLabel => _t('offsetLabel');
+  String get prevPage => _t('prevPage');
+  String get nextPage => _t('nextPage');
+  String get loadFailed => _t('loadFailed');
+  String get backendStartFailed => _t('backendStartFailed');
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppStrings> {

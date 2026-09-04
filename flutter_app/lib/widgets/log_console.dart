@@ -14,10 +14,36 @@ class LogEntry {
 
 enum LogLevel { info, success, warning, error }
 
-class LogConsole extends StatelessWidget {
+class LogConsole extends StatefulWidget {
   final List<LogEntry> entries;
 
   const LogConsole({super.key, required this.entries});
+
+  @override
+  State<LogConsole> createState() => _LogConsoleState();
+}
+
+class _LogConsoleState extends State<LogConsole> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant LogConsole oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Keep the newest entry visible as the log grows.
+    if (widget.entries.length != oldWidget.entries.length) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        }
+      });
+    }
+  }
 
   Color _getColor(LogLevel level, Brightness brightness) {
     final isDark = brightness == Brightness.dark;
@@ -51,6 +77,7 @@ class LogConsole extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final monoFamily = AppTheme.monoFamily(context);
+    final entries = widget.entries;
 
     return Container(
       decoration: BoxDecoration(
@@ -59,6 +86,7 @@ class LogConsole extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(8),
       child: ListView.builder(
+        controller: _scrollController,
         itemCount: entries.length,
         itemBuilder: (context, index) {
           final entry = entries[index];

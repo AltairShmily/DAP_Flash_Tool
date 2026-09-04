@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
+import '../services/backend_manager.dart';
 
-class AppTitleBar extends StatelessWidget {
+class AppTitleBar extends ConsumerWidget {
   final String title;
 
   const AppTitleBar({super.key, this.title = 'DAP Flash Tool'});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
@@ -58,7 +60,16 @@ class AppTitleBar extends StatelessWidget {
           _WindowButton(
             icon: Iconsax.close_circle,
             color: cs.error,
-            onTap: () => appWindow.close(),
+            onTap: () async {
+              // Graceful shutdown: stop the Python backend before exiting,
+              // otherwise the child process is orphaned on every app close.
+              try {
+                await ref.read(backendManagerProvider).stop();
+              } catch (_) {
+                // Best effort — never block window close on cleanup errors.
+              }
+              appWindow.close();
+            },
           ),
         ],
       ),

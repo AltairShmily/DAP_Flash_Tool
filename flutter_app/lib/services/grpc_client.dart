@@ -5,6 +5,7 @@ class GrpcClient {
   static GrpcClient? _instance;
   ClientChannel? _channel;
   DapFlashServiceClient? _stub;
+  int _port = 50051;
 
   GrpcClient._();
 
@@ -13,12 +14,22 @@ class GrpcClient {
     return _instance!;
   }
 
+  /// Update the target port (from the backend READY handshake).
+  /// Recreates the channel when the port actually changes.
+  void setPort(int port) {
+    if (port == _port) return;
+    _port = port;
+    reset();
+  }
+
+  int get port => _port;
+
   /// Lazily create (or recreate) the channel + stub.
   void _ensureChannel() {
     if (_channel != null) return;
     _channel = ClientChannel(
       '127.0.0.1',
-      port: 50051,
+      port: _port,
       options: const ChannelOptions(
         credentials: ChannelCredentials.insecure(),
         idleTimeout: Duration(minutes: 5),

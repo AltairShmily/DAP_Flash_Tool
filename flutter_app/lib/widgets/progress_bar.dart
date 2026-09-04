@@ -1,29 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import '../l10n/app_strings.dart';
 
-/// Represents one phase of the flash operation.
-class FlashPhase {
-  final String label;
+/// Icon/color for one phase of the flash operation. Labels are resolved at
+/// build time from AppStrings so the indicator follows the app locale.
+class _PhaseStyle {
   final IconData icon;
   final Color? color;
 
-  const FlashPhase({required this.label, required this.icon, this.color});
+  const _PhaseStyle(this.icon, this.color);
 }
 
-/// Default phases for a flash operation.
-const defaultFlashPhases = [
-  FlashPhase(label: '连接', icon: Icons.link, color: Colors.blue),
-  FlashPhase(label: '擦除', icon: Icons.delete_sweep, color: Colors.orange),
-  FlashPhase(label: '编程', icon: Icons.memory, color: Colors.purple),
-  FlashPhase(label: '验证', icon: Icons.verified, color: Colors.teal),
-  FlashPhase(label: '复位', icon: Icons.restart_alt, color: Colors.green),
+const _phaseStyles = [
+  _PhaseStyle(Icons.link, Colors.blue),
+  _PhaseStyle(Icons.delete_sweep, Colors.orange),
+  _PhaseStyle(Icons.memory, Colors.purple),
+  _PhaseStyle(Icons.verified, Colors.teal),
+  _PhaseStyle(Icons.restart_alt, Colors.green),
 ];
+
+List<String> _phaseLabels(AppStrings strings) => [
+      strings.phaseConnect,
+      strings.phaseErase,
+      strings.phaseProgram,
+      strings.phaseVerify,
+      strings.phaseReset,
+    ];
 
 class FlashProgressBar extends StatelessWidget {
   final double progress; // 0.0 - 1.0
   final String? statusText;
   final String? speedText;
-  final int currentPhase; // 0-based index into defaultFlashPhases
+  final int currentPhase; // 0-based index into the 5 flash phases
 
   const FlashProgressBar({
     super.key,
@@ -38,14 +46,15 @@ class FlashProgressBar extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isComplete = progress >= 1.0;
+    final labels = _phaseLabels(AppStrings.of(context));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // ── Phase indicators ──
         Row(
-          children: List.generate(defaultFlashPhases.length, (i) {
-            final phase = defaultFlashPhases[i];
+          children: List.generate(_phaseStyles.length, (i) {
+            final phase = _phaseStyles[i];
             final isActive = i == currentPhase && !isComplete;
             final isDone = i < currentPhase || isComplete;
 
@@ -64,7 +73,7 @@ class FlashProgressBar extends StatelessWidget {
                   const SizedBox(width: 2),
                   Flexible(
                     child: Text(
-                      phase.label,
+                      labels[i],
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: isDone
                             ? Colors.green
@@ -95,7 +104,7 @@ class FlashProgressBar extends StatelessWidget {
                 backgroundColor: colorScheme.surfaceContainerHighest,
                 progressColor: isComplete
                     ? Colors.green
-                    : defaultFlashPhases[currentPhase.clamp(0, defaultFlashPhases.length - 1)].color ??
+                    : _phaseStyles[currentPhase.clamp(0, _phaseStyles.length - 1)].color ??
                         colorScheme.primary,
                 animation: true,
                 animateFromLastPercent: true,
@@ -122,7 +131,13 @@ class FlashProgressBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 if (statusText != null)
-                  Text(statusText!, style: theme.textTheme.bodySmall),
+                  Expanded(
+                    child: Text(
+                      statusText!,
+                      style: theme.textTheme.bodySmall,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 if (speedText != null)
                   Text(
                     speedText!,

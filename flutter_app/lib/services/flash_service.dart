@@ -22,8 +22,17 @@ class FlashService {
     }
   }
 
-  Stream<ProgressUpdate> eraseChip({String mode = 'chip'}) async* {
-    final call = _client.stub.eraseChip(EraseRequest()..mode = mode);
+  Stream<ProgressUpdate> eraseChip({
+    String mode = 'chip',
+    int startAddress = 0,
+    int length = 0,
+  }) async* {
+    final call = _client.stub.eraseChip(
+      EraseRequest()
+        ..mode = mode
+        ..startAddress = Int64(startAddress)
+        ..length = Int64(length),
+    );
 
     await for (final update in call) {
       yield update;

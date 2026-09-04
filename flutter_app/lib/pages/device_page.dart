@@ -4,6 +4,7 @@ import '../l10n/app_strings.dart';
 import '../providers/device_provider.dart';
 import '../providers/log_provider.dart';
 import '../widgets/collapsible_card.dart';
+import 'settings_page.dart';
 
 class DevicePage extends ConsumerStatefulWidget {
   const DevicePage({super.key});
@@ -14,7 +15,6 @@ class DevicePage extends ConsumerStatefulWidget {
 
 class _DevicePageState extends ConsumerState<DevicePage> {
   bool _showAdvanced = false;
-  bool _targetPower = false;
   late TextEditingController _targetController;
 
   @override
@@ -38,16 +38,16 @@ class _DevicePageState extends ConsumerState<DevicePage> {
 
   String _freqLabel(int freq) {
     switch (freq) {
-      case 1000:
+      case 1000000:
         return '1 MHz';
-      case 2000:
+      case 2000000:
         return '2 MHz';
-      case 4000:
+      case 4000000:
         return '4 MHz';
-      case 8000:
+      case 8000000:
         return '8 MHz';
       default:
-        return '$freq kHz';
+        return '${freq ~/ 1000} kHz';
     }
   }
 
@@ -270,10 +270,10 @@ class _DevicePageState extends ConsumerState<DevicePage> {
                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                   items: const [
-                    DropdownMenuItem(value: 1000, child: Text('1 MHz')),
-                    DropdownMenuItem(value: 2000, child: Text('2 MHz')),
-                    DropdownMenuItem(value: 4000, child: Text('4 MHz')),
-                    DropdownMenuItem(value: 8000, child: Text('8 MHz')),
+                    DropdownMenuItem(value: 1000000, child: Text('1 MHz')),
+                    DropdownMenuItem(value: 2000000, child: Text('2 MHz')),
+                    DropdownMenuItem(value: 4000000, child: Text('4 MHz')),
+                    DropdownMenuItem(value: 8000000, child: Text('8 MHz')),
                   ],
                   onChanged: deviceState.isConnected
                       ? null
@@ -362,6 +362,7 @@ class _DevicePageState extends ConsumerState<DevicePage> {
                                           .connect(
                                             probeId: probeId,
                                             target: target,
+                                            driver: ref.read(settingsProvider).driver,
                                           );
                                       if (context.mounted) {
                                         ScaffoldMessenger.of(context).showSnackBar(
@@ -455,7 +456,7 @@ class _DevicePageState extends ConsumerState<DevicePage> {
                               }
                             : null,
                         icon: const Icon(Icons.restart_alt),
-                        label: const Text('软件复位'),
+                        label: Text(strings.softwareReset),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -476,7 +477,7 @@ class _DevicePageState extends ConsumerState<DevicePage> {
                               }
                             : null,
                         icon: const Icon(Icons.power_settings_new),
-                        label: const Text('硬件复位'),
+                        label: Text(strings.hardwareReset),
                       ),
                     ),
                   ],
@@ -523,42 +524,20 @@ class _DevicePageState extends ConsumerState<DevicePage> {
                         const Divider(),
                         const SizedBox(height: 8),
 
-                        // Serial number info
+                        // Serial number info (probe list may be empty after a
+                        // rescan while still connected — never call .first on it)
                         if (deviceState.isConnected &&
                             deviceState.selectedProbeId != null)
                           Builder(builder: (context) {
-                            final probe = deviceState.probes.firstWhere(
-                              (p) => p.id == deviceState.selectedProbeId,
-                              orElse: () => deviceState.probes.first,
-                            );
-                            return _infoRow(strings.probeSerial, probe.serialNumber, theme);
+                            final matches = deviceState.probes
+                                .where((p) => p.id == deviceState.selectedProbeId);
+                            final serial = matches.isNotEmpty
+                                ? matches.first.serialNumber
+                                : deviceState.selectedProbeId!;
+                            return _infoRow(strings.probeSerial, serial, theme);
                           }),
                         if (!deviceState.isConnected)
                           _infoRow(strings.probeSerial, '—', theme),
-
-                        const SizedBox(height: 12),
-
-                        // Target power
-                        Text(strings.targetPower, style: theme.textTheme.labelLarge),
-                        const SizedBox(height: 8),
-                        SegmentedButton<bool>(
-                          segments: [
-                            ButtonSegment(
-                              value: true,
-                              label: Text(strings.targetPowerOn),
-                              icon: const Icon(Icons.power),
-                            ),
-                            ButtonSegment(
-                              value: false,
-                              label: Text(strings.targetPowerOff),
-                              icon: const Icon(Icons.power_off),
-                            ),
-                          ],
-                          selected: {_targetPower},
-                          onSelectionChanged: (v) {
-                            setState(() => _targetPower = v.first);
-                          },
-                        ),
                       ],
                     ),
                   ),

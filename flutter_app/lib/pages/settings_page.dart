@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_strings.dart';
+import '../providers/device_provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/locale_provider.dart';
 import '../providers/history_provider.dart';
@@ -14,19 +15,26 @@ final settingsProvider = StateNotifierProvider<SettingsNotifier, AppSettings>(
   (ref) => SettingsNotifier(),
 );
 
-/// Singleton backend manager — shared across the app.
-final backendManagerProvider = Provider<BackendManager>((ref) {
-  return BackendManager();
-});
+/// Push persisted defaults (frequency/protocol) into the device state so the
+/// settings page actually affects connections. Never touches a live session;
+/// the device page's own selectors take precedence once the user edits them.
+void applySettingsToDevice(WidgetRef ref) {
+  final deviceState = ref.read(deviceProvider);
+  if (deviceState.isConnected) return;
+  final settings = ref.read(settingsProvider);
+  final notifier = ref.read(deviceProvider.notifier);
+  notifier.setFrequency(int.tryParse(settings.frequency) ?? 1000000);
+  notifier.setProtocol(settings.protocol);
+}
 
 class AppSettings {
   final String driver;       // 'pyocd' or 'openocd'
-  final String frequency;    // '1000', '2000', '4000', '8000'
+  final String frequency;    // SWD/JTAG clock in Hz: '1000000' ... '8000000'
   final String protocol;     // 'swd' or 'jtag'
 
   const AppSettings({
     this.driver = 'pyocd',
-    this.frequency = '4000',
+    this.frequency = '1000000',
     this.protocol = 'swd',
   });
 
@@ -46,9 +54,16 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
+    var frequency = prefs.getString('frequency') ?? '1000000';
+    // Migrate legacy kHz-style values ('4000' meant 4 MHz) to real Hz.
+    const legacyKhz = {'1000', '2000', '4000', '8000'};
+    if (legacyKhz.contains(frequency)) {
+      frequency = '${int.parse(frequency) * 1000}';
+      await prefs.setString('frequency', frequency);
+    }
     state = AppSettings(
       driver: prefs.getString('driver') ?? 'pyocd',
-      frequency: prefs.getString('frequency') ?? '4000',
+      frequency: frequency,
       protocol: prefs.getString('protocol') ?? 'swd',
     );
   }
@@ -359,7 +374,7 @@ class SettingsPage extends ConsumerWidget {
                       ),
                       RadioListTile<String>(
                         title: Text(strings.openocd),
-                        subtitle: Text(strings.openocdSubtitle),
+                        subtitle: Text(strings.openocdExperimental),
                         value: 'openocd',
                         contentPadding: EdgeInsets.zero,
                         dense: true,
@@ -391,13 +406,16 @@ class SettingsPage extends ConsumerWidget {
                     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                   items: const [
-                    DropdownMenuItem(value: '1000', child: Text('1 MHz')),
-                    DropdownMenuItem(value: '2000', child: Text('2 MHz')),
-                    DropdownMenuItem(value: '4000', child: Text('4 MHz')),
-                    DropdownMenuItem(value: '8000', child: Text('8 MHz')),
+                    DropdownMenuItem(value: '1000000', child: Text('1 MHz')),
+                    DropdownMenuItem(value: '2000000', child: Text('2 MHz')),
+                    DropdownMenuItem(value: '4000000', child: Text('4 MHz')),
+                    DropdownMenuItem(value: '8000000', child: Text('8 MHz')),
                   ],
                   onChanged: (v) {
-                    if (v != null) ref.read(settingsProvider.notifier).setFrequency(v);
+                    if (v != null) {
+                      ref.read(settingsProvider.notifier).setFrequency(v);
+                      applySettingsToDevice(ref);
+                    }
                   },
                 ),
                 const SizedBox(height: 16),
@@ -421,6 +439,7 @@ class SettingsPage extends ConsumerWidget {
                   selected: {settings.protocol},
                   onSelectionChanged: (protocols) {
                     ref.read(settingsProvider.notifier).setProtocol(protocols.first);
+                    applySettingsToDevice(ref);
                   },
                 ),
               ],
@@ -459,10 +478,15 @@ class SettingsPage extends ConsumerWidget {
                       ),
                     );
                     if (confirmed == true) {
-                      ref.read(historyProvider.notifier).clearHistory();
+                      final ok = await ref.read(historyProvider.notifier).clearHistory();
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(strings.historyCleared)),
+                          SnackBar(
+                            content: Text(
+                              ok ? strings.historyCleared : strings.operationFailed,
+                            ),
+                            backgroundColor: ok ? null : theme.colorScheme.error,
+                          ),
                         );
                       }
                     }
@@ -583,16 +607,17 @@ class SettingsPage extends ConsumerWidget {
 
   static String _freqLabel(String freq) {
     switch (freq) {
-      case '1000':
+      case '1000000':
         return '1 MHz';
-      case '2000':
+      case '2000000':
         return '2 MHz';
-      case '4000':
+      case '4000000':
         return '4 MHz';
-      case '8000':
+      case '8000000':
         return '8 MHz';
       default:
-        return '$freq kHz';
+        final hz = int.tryParse(freq);
+        return hz == null ? freq : '${hz ~/ 1000} kHz';
     }
   }
 

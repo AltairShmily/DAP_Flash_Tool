@@ -9,6 +9,7 @@ class DeviceState {
   final String? probeName;
   final String? targetName;
   final String? errorMessage;
+  /// SWD/JTAG clock in Hz (pyocd contract). UI labels show MHz.
   final int frequency;
   final String protocol;
   final List<Probe> probes;
@@ -20,7 +21,7 @@ class DeviceState {
     this.probeName,
     this.targetName,
     this.errorMessage,
-    this.frequency = 4000,
+    this.frequency = 1000000,
     this.protocol = 'swd',
     this.probes = const [],
     this.isScanning = false,
@@ -30,24 +31,29 @@ class DeviceState {
   DeviceState copyWith({
     ConnectionState? connectionState,
     String? probeName,
+    bool clearProbeName = false,
     String? targetName,
+    bool clearTargetName = false,
     String? errorMessage,
+    bool clearError = false,
     int? frequency,
     String? protocol,
     List<Probe>? probes,
     bool? isScanning,
     String? selectedProbeId,
+    bool clearSelectedProbeId = false,
   }) {
     return DeviceState(
       connectionState: connectionState ?? this.connectionState,
-      probeName: probeName ?? this.probeName,
-      targetName: targetName ?? this.targetName,
-      errorMessage: errorMessage ?? this.errorMessage,
+      probeName: clearProbeName ? null : (probeName ?? this.probeName),
+      targetName: clearTargetName ? null : (targetName ?? this.targetName),
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       frequency: frequency ?? this.frequency,
       protocol: protocol ?? this.protocol,
       probes: probes ?? this.probes,
       isScanning: isScanning ?? this.isScanning,
-      selectedProbeId: selectedProbeId ?? this.selectedProbeId,
+      selectedProbeId:
+          clearSelectedProbeId ? null : (selectedProbeId ?? this.selectedProbeId),
     );
   }
 
@@ -68,16 +74,17 @@ class DeviceNotifier extends StateNotifier<DeviceState> {
       connectionState: ConnectionState.connected,
       probeName: probeName,
       targetName: targetName,
-      errorMessage: null,
+      clearError: true,
     );
   }
 
   void setDisconnected() {
     state = state.copyWith(
       connectionState: ConnectionState.disconnected,
-      probeName: null,
-      targetName: null,
-      selectedProbeId: null,
+      clearProbeName: true,
+      clearTargetName: true,
+      clearSelectedProbeId: true,
+      clearError: true,
     );
   }
 
@@ -106,7 +113,7 @@ class DeviceNotifier extends StateNotifier<DeviceState> {
 
   /// Scan for debug probes via gRPC
   Future<void> listProbes() async {
-    state = state.copyWith(isScanning: true);
+    state = state.copyWith(isScanning: true, clearError: true);
     try {
       final probes = await _service.listProbes();
       state = state.copyWith(probes: probes, isScanning: false);
@@ -122,25 +129,31 @@ class DeviceNotifier extends StateNotifier<DeviceState> {
     }
   }
 
-  /// Connect to the selected probe with current settings
+  /// Connect to the selected probe with current settings.
+  /// [driver] selects the backend driver ('pyocd'/'openocd', '' = backend default).
   Future<bool> connect({
     required String probeId,
     required String target,
+    String driver = '',
   }) async {
-    state = state.copyWith(connectionState: ConnectionState.connecting);
+    state = state.copyWith(
+      connectionState: ConnectionState.connecting,
+      clearError: true,
+    );
     try {
       final response = await _service.connect(
         probeId: probeId,
         target: target,
         frequency: state.frequency,
         protocol: state.protocol,
+        driver: driver,
       );
       if (response.success) {
         state = state.copyWith(
           connectionState: ConnectionState.connected,
           probeName: probeId,
           targetName: response.targetName,
-          errorMessage: null,
+          clearError: true,
         );
         return true;
       } else {
@@ -183,7 +196,8 @@ class DeviceNotifier extends StateNotifier<DeviceState> {
   Future<String> readChipId() async {
     try {
       final result = await _service.readChipId();
-      final hexId = result.chipId.toRadixString(16).toUpperCase().padLeft(8, '0');
+      final hexId =
+          result.chipId.toRadixString(16).toUpperCase().padLeft(8, '0');
       return '0x$hexId — ${result.description}';
     } catch (e) {
       return 'Error: $e';

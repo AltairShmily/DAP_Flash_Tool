@@ -98,6 +98,7 @@ class PackNotifier extends StateNotifier<PackState> {
 
   Future<void> downloadPack(String packUrl, String packName) async {
     state = state.copyWith(isDownloading: true, downloadProgress: 0.0, clearError: true);
+    String? failure;
     try {
       await for (final update in _service.downloadPack(
         packUrl: packUrl,
@@ -106,6 +107,17 @@ class PackNotifier extends StateNotifier<PackState> {
         state = state.copyWith(
           downloadProgress: update.progress.clamp(0.0, 1.0),
         );
+        if (update.error.isNotEmpty) {
+          failure = update.error;
+        }
+      }
+      if (failure != null) {
+        state = state.copyWith(
+          isDownloading: false,
+          downloadProgress: 0.0,
+          errorMessage: failure,
+        );
+        return;
       }
       state = state.copyWith(isDownloading: false, downloadProgress: 1.0);
       // Auto-refresh pack list after download completes
@@ -115,6 +127,33 @@ class PackNotifier extends StateNotifier<PackState> {
         isDownloading: false,
         errorMessage: 'Download failed: $e',
       );
+    }
+  }
+
+  /// Install a local .pack file via the backend (copies + parses + indexes it).
+  Future<bool> installPack(String packPath) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final result = await _service.installPack(packPath);
+      await loadPacks();
+      if (!result.success) {
+        state = state.copyWith(errorMessage: result.message);
+      }
+      return result.success;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: 'Install failed: $e');
+      return false;
+    }
+  }
+
+  /// Scan a directory for .pack files and index them in the backend.
+  Future<void> scanPacks(String directory) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      await _service.scanPacks(directory: directory);
+      await loadPacks();
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: 'Scan failed: $e');
     }
   }
 

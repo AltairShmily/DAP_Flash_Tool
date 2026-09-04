@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:file_picker/file_picker.dart';
 import '../l10n/app_strings.dart';
 import '../proto/dap_flash.pb.dart';
 import '../providers/pack_provider.dart';
@@ -87,9 +88,16 @@ class _PackPageState extends ConsumerState<PackPage> {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: () {
-                          ref.read(packProvider.notifier).loadPacks();
-                        },
+                        onPressed: packState.isLoading
+                            ? null
+                            : () async {
+                                final dir = await FilePicker.platform.getDirectoryPath(
+                                  dialogTitle: strings.scanDirectory,
+                                );
+                                if (dir != null) {
+                                  await ref.read(packProvider.notifier).scanPacks(dir);
+                                }
+                              },
                         icon: const Icon(Icons.folder_open),
                         label: Text(strings.scanDirectory),
                       ),
@@ -97,20 +105,45 @@ class _PackPageState extends ConsumerState<PackPage> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(strings.importNotConnected)),
-                          );
-                        },
+                        onPressed: packState.isLoading
+                            ? null
+                            : () async {
+                                final result = await FilePicker.platform.pickFiles(
+                                  dialogTitle: strings.importPack,
+                                  type: FileType.custom,
+                                  allowedExtensions: ['pack'],
+                                );
+                                if (result == null || result.files.isEmpty) return;
+                                final path = result.files.first.path;
+                                if (path == null) return;
+                                final ok = await ref
+                                    .read(packProvider.notifier)
+                                    .installPack(path);
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(ok
+                                          ? strings.importPack
+                                          : (ref.read(packProvider).errorMessage ??
+                                              strings.operationFailed)),
+                                      backgroundColor: ok
+                                          ? null
+                                          : Theme.of(context).colorScheme.error,
+                                    ),
+                                  );
+                                }
+                              },
                         icon: const Icon(Icons.add),
                         label: Text(strings.importPack),
                       ),
                     ),
                     const SizedBox(width: 8),
                     IconButton.filledTonal(
-                      onPressed: () {
-                        ref.read(packProvider.notifier).loadPacks();
-                      },
+                      onPressed: packState.isLoading
+                          ? null
+                          : () {
+                              ref.read(packProvider.notifier).loadPacks();
+                            },
                       icon: const Icon(Icons.refresh),
                       tooltip: strings.refresh,
                     ),
@@ -363,7 +396,7 @@ class _PackCard extends StatelessWidget {
                     OutlinedButton.icon(
                       onPressed: onDownload,
                       icon: const Icon(Icons.download, size: 16),
-                      label: const Text('下载'),
+                      label: Text(AppStrings.of(context).download),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                         minimumSize: Size.zero,
