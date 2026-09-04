@@ -41,6 +41,13 @@ jobs:
           touch backend/proto/__init__.py
           sed -i 's/^import dap_flash_pb2/from . import dap_flash_pb2/' backend/proto/dap_flash_pb2_grpc.py
 
+      - name: Verify committed proto code is in sync
+        run: |
+          git diff --exit-code -- backend/proto || {
+            echo "::error::Committed Python proto code is stale — regenerate and commit (see scripts/setup_dev.bat)"
+            exit 1
+          }
+
       - name: Run tests
         working-directory: backend
         run: |
@@ -48,12 +55,25 @@ jobs:
           python test_parsers.py
           python test_pack.py
           pip install pytest
-          pytest test_drivers.py -v
+          pytest test_drivers.py test_flash_service.py -v
 
-      - name: Verify server starts
+      - name: Verify server starts and binds
         working-directory: backend
         run: |
-          timeout 5 python server.py || true
+          python server.py 50099 > server.log 2>&1 &
+          SERVER_PID=$!
+          for _ in $(seq 1 20); do
+            grep -q "^READY" server.log && break
+            sleep 0.5
+          done
+          if ! grep -q "^READY 50099" server.log; then
+            echo "::error::server did not report READY"
+            cat server.log
+            kill $SERVER_PID 2>/dev/null || true
+            exit 1
+          fi
+          python -c "import socket; socket.create_connection(('127.0.0.1', 50099), timeout=5).close(); print('server port reachable')"
+          kill $SERVER_PID
 
   # ─── Flutter 分析 + Linux 构建 ───
   flutter-analyze:
@@ -82,6 +102,13 @@ jobs:
             --proto_path=proto \
             --dart_out=grpc:flutter_app/lib/proto \
             proto/dap_flash.proto
+
+      - name: Verify committed Dart proto code is in sync
+        run: |
+          git diff --exit-code -- flutter_app/lib/proto || {
+            echo "::error::Committed Dart proto code is stale — regenerate with protoc_plugin 22.5.0 and commit"
+            exit 1
+          }
 
       - name: Install dependencies
         working-directory: flutter_app
