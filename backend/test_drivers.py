@@ -1,3 +1,4 @@
+"""Tests for the driver abstraction layer (no hardware required)."""
 import sys
 import os
 import pytest
@@ -13,57 +14,61 @@ try:
 except ImportError:
     HAS_PYOCD = False
 
+
 def test_base_class():
     """Verify BaseDriver is abstract."""
-    try:
+    with pytest.raises(TypeError):
         BaseDriver()
-        print("FAIL: BaseDriver should not be instantiable")
-        sys.exit(1)
-    except TypeError:
-        print("BaseDriver is abstract OK")
+    print("BaseDriver is abstract OK")
+
+
+def test_drivers_have_no_pack_methods():
+    """Pack management is decoupled from drivers (lives in PackManager)."""
+    driver = OpenOCDDriver()
+    assert not hasattr(driver, 'install_pack')
+    assert not hasattr(driver, 'list_installed_packs')
+    if HAS_PYOCD:
+        pyocd_driver = PyOCDDriver()
+        assert not hasattr(pyocd_driver, 'install_pack')
+        assert not hasattr(pyocd_driver, 'list_installed_packs')
+
 
 def test_pyocd_init():
     if not HAS_PYOCD:
-        print("PyOCD driver init SKIPPED (pyocd not installed)")
-        return
+        pytest.skip("pyocd not installed")
     driver = PyOCDDriver()
     assert not driver.is_connected()
     print("PyOCD driver init OK")
+
 
 def test_openocd_init():
     driver = OpenOCDDriver()
     assert not driver.is_connected()
     print("OpenOCD driver init OK")
 
-def test_pyocd_install_pack():
-    """Test pyocd pack installation."""
+
+def test_openocd_requires_running_process():
+    """All target operations must fail cleanly when OpenOCD is not running."""
+    driver = OpenOCDDriver()
+    with pytest.raises(RuntimeError):
+        driver.flash("any.bin", 0, lambda p, m, bw, tb: None)
+    with pytest.raises(RuntimeError):
+        driver.erase("chip")
+    with pytest.raises(RuntimeError):
+        driver.reset()
+
+
+def test_pyocd_requires_session():
     if not HAS_PYOCD:
         pytest.skip("pyocd not installed")
     driver = PyOCDDriver()
-    # This will fail in test environment, but verifies the method exists
     with pytest.raises(RuntimeError):
-        driver.install_pack("nonexistent.pack")
-
-def test_pyocd_list_installed_packs():
-    """Test listing installed packs."""
-    if not HAS_PYOCD:
-        pytest.skip("pyocd not installed")
-    driver = PyOCDDriver()
-    packs = driver.list_installed_packs()
-    assert isinstance(packs, list)
-
-def test_openocd_install_pack():
-    """Test that OpenOCD raises RuntimeError for pack management."""
-    driver = OpenOCDDriver()
+        driver.flash("any.bin", 0, lambda p, m, bw, tb: None)
     with pytest.raises(RuntimeError):
-        driver.install_pack("any.pack")
+        driver.erase("sector", start_address=0x08000000, length=0x400)
+    with pytest.raises(RuntimeError):
+        driver.reset_software()
 
-def test_openocd_list_installed_packs():
-    """Test that OpenOCD returns empty list for pack listing."""
-    driver = OpenOCDDriver()
-    packs = driver.list_installed_packs()
-    assert isinstance(packs, list)
-    assert len(packs) == 0
 
 def test_probe_info_fields():
     """Test ProbeInfo has all required fields."""
@@ -79,25 +84,28 @@ def test_probe_info_fields():
     assert info.firmware_version == "1.0.0"
     assert info.hardware_version == "2.0.0"
     assert info.target_voltage == 3.3
-    assert info.is_connected == False
+    assert info.is_connected is False
+
 
 def test_pyocd_reset_methods_exist():
-    """Test pyocd driver has reset methods."""
     if not HAS_PYOCD:
         pytest.skip("pyocd not installed")
     driver = PyOCDDriver()
     assert hasattr(driver, 'reset_software')
     assert hasattr(driver, 'reset_hardware')
 
+
 def test_openocd_reset_methods_exist():
-    """Test openocd driver has reset methods."""
     driver = OpenOCDDriver()
     assert hasattr(driver, 'reset_software')
     assert hasattr(driver, 'reset_hardware')
 
+
 if __name__ == "__main__":
     test_base_class()
+    test_drivers_have_no_pack_methods()
     test_pyocd_init()
     test_openocd_init()
+    test_openocd_requires_running_process()
     test_probe_info_fields()
     print("All driver tests passed!")

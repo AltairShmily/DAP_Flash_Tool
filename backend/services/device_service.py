@@ -37,6 +37,8 @@ class DeviceServiceMixin:
             self._drivers["openocd"] = OpenOCDDriver()
         self._active_driver: BaseDriver | None = None
         self._active_driver_name: str = ""
+        self._active_target_name: str = ""
+        self._active_probe_id: str = ""
 
     def ListProbes(self, request, context):
         all_probes = []
@@ -52,11 +54,13 @@ class DeviceServiceMixin:
         return dap_flash_pb2.ProbeList(probes=all_probes)
 
     def ConnectProbe(self, request, context):
-        driver_name = "pyocd"
+        driver_name = request.driver if request.driver else "pyocd"
         driver = self._drivers.get(driver_name)
         if not driver:
+            available = ", ".join(sorted(self._drivers.keys())) or "none"
             return dap_flash_pb2.ConnectResponse(
-                success=False, error_message=f"Driver '{driver_name}' not available"
+                success=False,
+                error_message=f"Driver '{driver_name}' not available (installed: {available})",
             )
         try:
             driver.connect(
@@ -67,6 +71,8 @@ class DeviceServiceMixin:
             )
             self._active_driver = driver
             self._active_driver_name = driver_name
+            self._active_target_name = request.target
+            self._active_probe_id = request.probe_id
             return dap_flash_pb2.ConnectResponse(success=True, target_name=request.target)
         except Exception as e:
             return dap_flash_pb2.ConnectResponse(success=False, error_message=str(e))
@@ -76,6 +82,8 @@ class DeviceServiceMixin:
             self._active_driver.disconnect()
             self._active_driver = None
             self._active_driver_name = ""
+        self._active_target_name = ""
+        self._active_probe_id = ""
         return dap_flash_pb2.DisconnectProbeResponse()
 
     def GetProbeDetails(self, request, context):

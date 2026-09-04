@@ -21,8 +21,17 @@ class ChipInfo:
     description: str
 
 
+# callback(progress, message, bytes_written, total_bytes)
+# bytes_written/total_bytes are -1 when the driver cannot report them.
+FlashProgressCallback = Callable[[float, str, int, int], None]
+
+
 class BaseDriver(ABC):
-    """Driver abstraction base class."""
+    """Driver abstraction base class.
+
+    Drivers only provide probe/flash capabilities. Pack management lives in
+    pack.pack_manager.PackManager and must not depend on driver state.
+    """
 
     @abstractmethod
     def list_probes(self) -> list[ProbeInfo]:
@@ -31,7 +40,7 @@ class BaseDriver(ABC):
 
     @abstractmethod
     def connect(self, probe_id: str, target: str, frequency: int, protocol: str = "swd") -> None:
-        """Connect to target device."""
+        """Connect to target device. frequency is in Hz."""
         ...
 
     @abstractmethod
@@ -45,13 +54,22 @@ class BaseDriver(ABC):
         ...
 
     @abstractmethod
-    def flash(self, file_path: str, address: int, callback: Callable[[float, str], None]) -> None:
-        """Flash firmware. callback(progress, message) for progress updates."""
+    def flash(self, file_path: str, address: int, callback: FlashProgressCallback) -> None:
+        """Flash firmware.
+
+        address is the base address for raw binary files (ignored for HEX/ELF
+        which carry their own addresses). address <= 0 means "use file/target default".
+        """
         ...
 
     @abstractmethod
-    def erase(self, mode: str = "chip") -> None:
-        """Erase chip. mode: 'chip' or 'sector'."""
+    def erase(self, mode: str = "chip",
+              start_address: Optional[int] = None,
+              length: Optional[int] = None) -> None:
+        """Erase flash. mode: 'chip' or 'sector'.
+
+        Sector mode requires start_address and length.
+        """
         ...
 
     @abstractmethod
@@ -72,14 +90,4 @@ class BaseDriver(ABC):
     @abstractmethod
     def read_chip_id(self) -> ChipInfo:
         """Read chip ID."""
-        ...
-
-    @abstractmethod
-    def install_pack(self, pack_path: str) -> bool:
-        """Install a CMSIS pack."""
-        ...
-
-    @abstractmethod
-    def list_installed_packs(self) -> list[dict]:
-        """List installed packs."""
         ...

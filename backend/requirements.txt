@@ -1,7 +1,10 @@
 pyocd>=0.36.0
-grpcio>=1.60.0
-grpcio-tools>=1.60.0
-protobuf>=4.25.0
+# Pinned: generated proto code embeds these versions — CI verifies sync via
+# git diff, so drifting generator versions would cause spurious mismatches.
+grpcio~=1.83.0
+grpcio-tools~=1.83.0
+protobuf>=7.35,<8
 intelhex>=2.3.0
 pyelftools>=0.30.0
+defusedxml>=0.7.1
 pytest>=7.0.0

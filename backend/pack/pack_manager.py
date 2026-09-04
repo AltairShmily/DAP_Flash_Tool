@@ -1,6 +1,6 @@
 import os
 import json
-from pathlib import Path
+import threading
 
 from . import PackInfo
 from .pack_parser import parse_pack
@@ -14,7 +14,12 @@ class PackManager:
         os.makedirs(self._packs_dir, exist_ok=True)
         self._packs: dict[str, PackInfo] = {}
         self._index_path = os.path.join(self._packs_dir, "index.json")
+        self._lock = threading.Lock()
         self._load_index()
+
+    @property
+    def packs_dir(self) -> str:
+        return self._packs_dir
 
     def _load_index(self):
         if os.path.exists(self._index_path):
@@ -38,25 +43,30 @@ class PackManager:
         found = []
         for root, dirs, files in os.walk(directory):
             for file in files:
-                if file.endswith('.pack'):
+                if file.lower().endswith('.pack'):
                     pack_path = os.path.join(root, file)
                     try:
                         pack_info = parse_pack(pack_path)
-                        self._packs[pack_path] = pack_info
+                        with self._lock:
+                            self._packs[pack_path] = pack_info
                         found.append(pack_info)
                     except Exception as e:
                         print(f"Failed to parse {pack_path}: {e}")
-        self._save_index()
+        with self._lock:
+            self._save_index()
         return found
 
     def get_all_packs(self) -> list[PackInfo]:
         """Get all loaded packs."""
-        return list(self._packs.values())
+        with self._lock:
+            return list(self._packs.values())
 
     def search_chips(self, query: str) -> list[tuple[str, PackInfo]]:
         """Search for chips matching query across all packs."""
         results = []
-        for pack in self._packs.values():
+        with self._lock:
+            packs = list(self._packs.values())
+        for pack in packs:
             for chip in pack.chips:
                 if query.lower() in chip.name.lower():
                     results.append((chip.name, pack))
@@ -64,7 +74,9 @@ class PackManager:
 
     def get_chip_info(self, chip_name: str) -> tuple | None:
         """Get chip info by name."""
-        for pack in self._packs.values():
+        with self._lock:
+            packs = list(self._packs.values())
+        for pack in packs:
             for chip in pack.chips:
                 if chip.name.lower() == chip_name.lower():
                     return chip
@@ -90,12 +102,15 @@ class PackManager:
 
         # Parse and index
         pack_info = parse_pack(pack_path)
-        self._packs[pack_path] = pack_info
-        self._save_index()
+        with self._lock:
+            self._packs[pack_path] = pack_info
+            self._save_index()
         return True
 
     def list_installed_packs(self) -> list[dict]:
         """Return all installed packs as plain dicts."""
+        with self._lock:
+            packs = list(self._packs.values())
         return [
             {
                 'name': p.name,
@@ -103,5 +118,5 @@ class PackManager:
                 'version': p.version,
                 'supported_chips': [c.name for c in p.chips],
             }
-            for p in self._packs.values()
+            for p in packs
         ]

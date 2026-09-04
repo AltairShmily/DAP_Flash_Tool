@@ -13,17 +13,45 @@ from pack.pack_parser import parse_pack
 
 
 SAMPLE_PDSC = """<?xml version="1.0" encoding="UTF-8"?>
-<package name="TestPack" vendor="TestVendor" version="1.2.3">
+<package schemaVersion="1.7.7">
+  <vendor>TestVendor</vendor>
+  <name>TestPack</name>
+  <description>Test device family pack</description>
+  <url>https://example.com/pack/</url>
+  <releases>
+    <release version="1.2.3" date="2024-05-01">latest release</release>
+    <release version="1.2.2" date="2024-01-01">previous release</release>
+  </releases>
   <devices>
-    <device family="STM32F4">
-      <device name="STM32F407VG" Dvendor="STMicroelectronics">
-        <memory name="Flash" start="0x08000000" size="0x100000" access="rx"/>
-        <memory name="RAM" start="0x20000000" size="0x20000" access="rw"/>
+    <family Dfamily="STM32F4" Dvendor="STMicroelectronics:13">
+      <device Dname="STM32F407VG">
+        <memory name="IROM1" access="rx" start="0x08000000" size="0x100000" default="1"/>
+        <memory name="IRAM1" access="rwx" start="0x20000000" size="0x20000" default="1"/>
+        <algorithm name="Flash/STM32F4xx_1024.FLM" start="0x08000000" size="0x100000"/>
       </device>
-      <device name="STM32F411RE" Dvendor="STMicroelectronics">
-        <memory name="Flash" start="0x08000000" size="0x80000" access="rx"/>
-        <memory name="RAM" start="0x20000000" size="0x20000" access="rw"/>
+      <device Dname="STM32F411RE">
+        <memory name="IROM1" access="rx" start="0x08000000" size="0x80000" default="1"/>
+        <memory name="IRAM1" access="rwx" start="0x20000000" size="0x20000" default="1"/>
       </device>
+    </family>
+  </devices>
+</package>
+"""
+
+# Modern schema style: memory carries id/name, devices sit directly under
+# <devices> with deviceFamily; flash range only discoverable via <algorithm>.
+MODERN_PDSC = """<?xml version="1.0" encoding="UTF-8"?>
+<package schemaVersion="1.7.28">
+  <vendor>ModernVendor</vendor>
+  <name>ModernPack</name>
+  <releases>
+    <release version="0.9.1">beta</release>
+  </releases>
+  <devices>
+    <device deviceFamily="MOD1" Dvendor="ModernVendor" Dname="MOD1X100">
+      <memory id="Flash" name="Flash1" access="rx" start="0x10000000" size="0x40000" default="1"/>
+      <memory id="RAM" name="RAM1" access="rwx" start="0x20000000" size="0x8000" default="1"/>
+      <algorithm name="Algo/FLM/mod1x.FLM" start="0x10000000" size="0x40000"/>
     </device>
   </devices>
 </package>
@@ -76,6 +104,33 @@ def test_pack_parser():
         assert chip1.flash_size == 0x80000
 
         print("PackParser OK")
+    finally:
+        os.unlink(pack_path)
+
+
+def test_pack_parser_modern_schema():
+    """Test parsing the modern PDSC schema (memory id/name, algorithm fallback)."""
+    with tempfile.NamedTemporaryFile(suffix='.pack', delete=False) as tmp:
+        pack_path = tmp.name
+
+    try:
+        with zipfile.ZipFile(pack_path, 'w') as zf:
+            zf.writestr("ModernVendor.ModernPack.pdsc", MODERN_PDSC)
+
+        result = parse_pack(pack_path)
+        assert result.name == "ModernPack"
+        assert result.vendor == "ModernVendor"
+        assert result.version == "0.9.1"
+        assert len(result.chips) == 1
+
+        chip = result.chips[0]
+        assert chip.name == "MOD1X100"
+        assert chip.family == "MOD1"
+        assert chip.flash_base == 0x10000000
+        assert chip.flash_size == 0x40000
+        assert chip.ram_base == 0x20000000
+        assert chip.ram_size == 0x8000
+        print("PackParser modern schema OK")
     finally:
         os.unlink(pack_path)
 
@@ -150,6 +205,7 @@ def test_pack_manager_empty_dir():
 if __name__ == "__main__":
     test_dataclasses()
     test_pack_parser()
+    test_pack_parser_modern_schema()
     test_pack_parser_no_pdsc()
     test_pack_manager()
     test_pack_manager_empty_dir()

@@ -217,10 +217,15 @@ def test_hex_preview_hex():
     
     from parsers.hex_preview import preview_hex, get_file_info
     
-    # Test preview with correct offset (0x08000000)
-    result = preview_hex(test_path, offset=0x08000000, length=16)
+    # offset is relative to the file's base address (0x08000000 here)
+    result = preview_hex(test_path, offset=0, length=16)
     assert "08000000" in result
     assert "DE AD BE EF" in result
+
+    # paginating by 2 bytes shows the tail of the data at base+2
+    result2 = preview_hex(test_path, offset=2, length=16)
+    assert "08000002" in result2
+    assert "BE EF" in result2
     
     # Test file info
     info = get_file_info(test_path)
@@ -232,6 +237,44 @@ def test_hex_preview_hex():
     print("HEX preview HEX OK")
 
 
+def test_get_file_info_elf():
+    """get_file_info must report ELF files as 'elf', not 'bin'."""
+    import struct
+    from parsers.hex_preview import get_file_info
+
+    test_path = "test_info.elf"
+    e_ident = b"\x7fELF\x01\x01\x01\x00" + b"\x00" * 8
+    e_type = struct.pack("<H", 2)
+    e_machine = struct.pack("<H", 40)
+    e_version = struct.pack("<I", 1)
+    e_entry = struct.pack("<I", 0x08000100)
+    e_phoff = struct.pack("<I", 52)
+    e_shoff = struct.pack("<I", 0)
+    e_flags = struct.pack("<I", 0)
+    e_ehsize = struct.pack("<H", 52)
+    e_phentsize = struct.pack("<H", 32)
+    e_phnum = struct.pack("<H", 1)
+    e_shentsize = struct.pack("<H", 0)
+    e_shnum = struct.pack("<H", 0)
+    e_shstrndx = struct.pack("<H", 0)
+    elf_header = (e_ident + e_type + e_machine + e_version + e_entry +
+                  e_phoff + e_shoff + e_flags + e_ehsize + e_phentsize +
+                  e_phnum + e_shentsize + e_shnum + e_shstrndx)
+    load_data = b"\xAA" * 16
+    phdr = struct.pack("<IIIIIIII", 1, 52 + 32, 0x08000000, 0x08000000,
+                       len(load_data), len(load_data), 5, 4)
+    with open(test_path, "wb") as f:
+        f.write(elf_header + phdr + load_data)
+
+    info = get_file_info(test_path)
+    assert info["format"] == "elf"
+    assert info["total_size"] == 16
+    assert info["base_address"] == 0x08000000
+
+    os.remove(test_path)
+    print("get_file_info ELF OK")
+
+
 if __name__ == "__main__":
     test_bin_parser()
     test_bin_parser_custom_address()
@@ -239,4 +282,5 @@ if __name__ == "__main__":
     test_elf_parser()
     test_hex_preview_bin()
     test_hex_preview_hex()
+    test_get_file_info_elf()
     print("All parser tests passed!")

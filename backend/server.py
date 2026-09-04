@@ -40,9 +40,14 @@ def serve(port: int = 50051):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     service = DapFlashService()
     dap_flash_pb2_grpc.add_DapFlashServiceServicer_to_server(service, server)
-    server.add_insecure_port(f"[::]:{port}")
+    # Localhost only: the service is unauthenticated by design (see docs S2).
+    bound_port = server.add_insecure_port(f"127.0.0.1:{port}")
+    if bound_port == 0:
+        print(f"ERROR: failed to bind 127.0.0.1:{port}", flush=True)
+        sys.exit(1)
     server.start()
-    print(f"gRPC server started on port {port}")
+    # Handshake line consumed by the Flutter BackendManager.
+    print(f"READY {bound_port}", flush=True)
     try:
         while True:
             time.sleep(86400)
