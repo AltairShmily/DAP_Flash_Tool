@@ -166,12 +166,14 @@ class ConnectRequest extends $pb.GeneratedMessage {
     $core.String? target,
     $core.int? frequency,
     $core.String? protocol,
+    $core.String? driver,
   }) {
     final result = create();
     if (probeId != null) result.probeId = probeId;
     if (target != null) result.target = target;
     if (frequency != null) result.frequency = frequency;
     if (protocol != null) result.protocol = protocol;
+    if (driver != null) result.driver = driver;
     return result;
   }
 
@@ -192,6 +194,7 @@ class ConnectRequest extends $pb.GeneratedMessage {
     ..aOS(2, _omitFieldNames ? '' : 'target')
     ..a<$core.int>(3, _omitFieldNames ? '' : 'frequency', $pb.PbFieldType.O3)
     ..aOS(4, _omitFieldNames ? '' : 'protocol')
+    ..aOS(5, _omitFieldNames ? '' : 'driver')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -250,6 +253,15 @@ class ConnectRequest extends $pb.GeneratedMessage {
   $core.bool hasProtocol() => $_has(3);
   @$pb.TagNumber(4)
   void clearProtocol() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get driver => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set driver($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasDriver() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearDriver() => $_clearField(5);
 }
 
 class ConnectResponse extends $pb.GeneratedMessage {
@@ -419,6 +431,8 @@ class ProgressUpdate extends $pb.GeneratedMessage {
     $fixnum.Int64? bytesWritten,
     $fixnum.Int64? totalBytes,
     $core.String? message,
+    $core.bool? success,
+    $core.String? error,
   }) {
     final result = create();
     if (phase != null) result.phase = phase;
@@ -426,6 +440,8 @@ class ProgressUpdate extends $pb.GeneratedMessage {
     if (bytesWritten != null) result.bytesWritten = bytesWritten;
     if (totalBytes != null) result.totalBytes = totalBytes;
     if (message != null) result.message = message;
+    if (success != null) result.success = success;
+    if (error != null) result.error = error;
     return result;
   }
 
@@ -451,6 +467,8 @@ class ProgressUpdate extends $pb.GeneratedMessage {
     ..aInt64(3, _omitFieldNames ? '' : 'bytesWritten')
     ..aInt64(4, _omitFieldNames ? '' : 'totalBytes')
     ..aOS(5, _omitFieldNames ? '' : 'message')
+    ..aOB(6, _omitFieldNames ? '' : 'success')
+    ..aOS(7, _omitFieldNames ? '' : 'error')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -518,6 +536,24 @@ class ProgressUpdate extends $pb.GeneratedMessage {
   $core.bool hasMessage() => $_has(4);
   @$pb.TagNumber(5)
   void clearMessage() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.bool get success => $_getBF(5);
+  @$pb.TagNumber(6)
+  set success($core.bool value) => $_setBool(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasSuccess() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearSuccess() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.String get error => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set error($core.String value) => $_setString(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasError() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearError() => $_clearField(7);
 }
 
 class OperationResult extends $pb.GeneratedMessage {
@@ -659,9 +695,13 @@ class ChipIdResult extends $pb.GeneratedMessage {
 class EraseRequest extends $pb.GeneratedMessage {
   factory EraseRequest({
     $core.String? mode,
+    $fixnum.Int64? startAddress,
+    $fixnum.Int64? length,
   }) {
     final result = create();
     if (mode != null) result.mode = mode;
+    if (startAddress != null) result.startAddress = startAddress;
+    if (length != null) result.length = length;
     return result;
   }
 
@@ -679,6 +719,8 @@ class EraseRequest extends $pb.GeneratedMessage {
       package: const $pb.PackageName(_omitMessageNames ? '' : 'dap_flash'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'mode')
+    ..aInt64(2, _omitFieldNames ? '' : 'startAddress')
+    ..aInt64(3, _omitFieldNames ? '' : 'length')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -710,6 +752,24 @@ class EraseRequest extends $pb.GeneratedMessage {
   $core.bool hasMode() => $_has(0);
   @$pb.TagNumber(1)
   void clearMode() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get startAddress => $_getI64(1);
+  @$pb.TagNumber(2)
+  set startAddress($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasStartAddress() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearStartAddress() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get length => $_getI64(2);
+  @$pb.TagNumber(3)
+  set length($fixnum.Int64 value) => $_setInt64(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasLength() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearLength() => $_clearField(3);
 }
 
 class PackInfo extends $pb.GeneratedMessage {
@@ -2211,6 +2271,104 @@ class GetFlashHistoryRequest extends $pb.GeneratedMessage {
   static GetFlashHistoryRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<GetFlashHistoryRequest>(create);
   static GetFlashHistoryRequest? _defaultInstance;
+}
+
+class ClearFlashHistoryRequest extends $pb.GeneratedMessage {
+  factory ClearFlashHistoryRequest() => create();
+
+  ClearFlashHistoryRequest._();
+
+  factory ClearFlashHistoryRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ClearFlashHistoryRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ClearFlashHistoryRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'dap_flash'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ClearFlashHistoryRequest clone() =>
+      ClearFlashHistoryRequest()..mergeFromMessage(this);
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ClearFlashHistoryRequest copyWith(
+          void Function(ClearFlashHistoryRequest) updates) =>
+      super.copyWith((message) => updates(message as ClearFlashHistoryRequest))
+          as ClearFlashHistoryRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ClearFlashHistoryRequest create() => ClearFlashHistoryRequest._();
+  @$core.override
+  ClearFlashHistoryRequest createEmptyInstance() => create();
+  static $pb.PbList<ClearFlashHistoryRequest> createRepeated() =>
+      $pb.PbList<ClearFlashHistoryRequest>();
+  @$core.pragma('dart2js:noInline')
+  static ClearFlashHistoryRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ClearFlashHistoryRequest>(create);
+  static ClearFlashHistoryRequest? _defaultInstance;
+}
+
+class ScanPacksRequest extends $pb.GeneratedMessage {
+  factory ScanPacksRequest({
+    $core.String? directory,
+  }) {
+    final result = create();
+    if (directory != null) result.directory = directory;
+    return result;
+  }
+
+  ScanPacksRequest._();
+
+  factory ScanPacksRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ScanPacksRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ScanPacksRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'dap_flash'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'directory')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ScanPacksRequest clone() => ScanPacksRequest()..mergeFromMessage(this);
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ScanPacksRequest copyWith(void Function(ScanPacksRequest) updates) =>
+      super.copyWith((message) => updates(message as ScanPacksRequest))
+          as ScanPacksRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ScanPacksRequest create() => ScanPacksRequest._();
+  @$core.override
+  ScanPacksRequest createEmptyInstance() => create();
+  static $pb.PbList<ScanPacksRequest> createRepeated() =>
+      $pb.PbList<ScanPacksRequest>();
+  @$core.pragma('dart2js:noInline')
+  static ScanPacksRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ScanPacksRequest>(create);
+  static ScanPacksRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get directory => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set directory($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasDirectory() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearDirectory() => $_clearField(1);
 }
 
 const $core.bool _omitFieldNames =

@@ -57,6 +57,7 @@ const ConnectRequest$json = {
     {'1': 'target', '3': 2, '4': 1, '5': 9, '10': 'target'},
     {'1': 'frequency', '3': 3, '4': 1, '5': 5, '10': 'frequency'},
     {'1': 'protocol', '3': 4, '4': 1, '5': 9, '10': 'protocol'},
+    {'1': 'driver', '3': 5, '4': 1, '5': 9, '10': 'driver'},
   ],
 };
 
@@ -64,7 +65,7 @@ const ConnectRequest$json = {
 final $typed_data.Uint8List connectRequestDescriptor = $convert.base64Decode(
     'Cg5Db25uZWN0UmVxdWVzdBIZCghwcm9iZV9pZBgBIAEoCVIHcHJvYmVJZBIWCgZ0YXJnZXQYAi'
     'ABKAlSBnRhcmdldBIcCglmcmVxdWVuY3kYAyABKAVSCWZyZXF1ZW5jeRIaCghwcm90b2NvbBgE'
-    'IAEoCVIIcHJvdG9jb2w=');
+    'IAEoCVIIcHJvdG9jb2wSFgoGZHJpdmVyGAUgASgJUgZkcml2ZXI=');
 
 @$core.Deprecated('Use connectResponseDescriptor instead')
 const ConnectResponse$json = {
@@ -114,6 +115,8 @@ const ProgressUpdate$json = {
     {'1': 'bytes_written', '3': 3, '4': 1, '5': 3, '10': 'bytesWritten'},
     {'1': 'total_bytes', '3': 4, '4': 1, '5': 3, '10': 'totalBytes'},
     {'1': 'message', '3': 5, '4': 1, '5': 9, '10': 'message'},
+    {'1': 'success', '3': 6, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'error', '3': 7, '4': 1, '5': 9, '10': 'error'},
   ],
   '4': [ProgressUpdate_Phase$json],
 };
@@ -135,9 +138,9 @@ final $typed_data.Uint8List progressUpdateDescriptor = $convert.base64Decode(
     'Cg5Qcm9ncmVzc1VwZGF0ZRI1CgVwaGFzZRgBIAEoDjIfLmRhcF9mbGFzaC5Qcm9ncmVzc1VwZG'
     'F0ZS5QaGFzZVIFcGhhc2USGgoIcHJvZ3Jlc3MYAiABKAJSCHByb2dyZXNzEiMKDWJ5dGVzX3dy'
     'aXR0ZW4YAyABKANSDGJ5dGVzV3JpdHRlbhIfCgt0b3RhbF9ieXRlcxgEIAEoA1IKdG90YWxCeX'
-    'RlcxIYCgdtZXNzYWdlGAUgASgJUgdtZXNzYWdlIlMKBVBoYXNlEg4KCkNPTk5FQ1RJTkcQABIL'
-    'CgdFUkFTSU5HEAESDwoLUFJPR1JBTU1JTkcQAhINCglWRVJJRllJTkcQAxINCglSRVNFVFRJTk'
-    'cQBA==');
+    'RlcxIYCgdtZXNzYWdlGAUgASgJUgdtZXNzYWdlEhgKB3N1Y2Nlc3MYBiABKAhSB3N1Y2Nlc3MS'
+    'FAoFZXJyb3IYByABKAlSBWVycm9yIlMKBVBoYXNlEg4KCkNPTk5FQ1RJTkcQABILCgdFUkFTSU'
+    '5HEAESDwoLUFJPR1JBTU1JTkcQAhINCglWRVJJRllJTkcQAxINCglSRVNFVFRJTkcQBA==');
 
 @$core.Deprecated('Use operationResultDescriptor instead')
 const OperationResult$json = {
@@ -172,12 +175,15 @@ const EraseRequest$json = {
   '1': 'EraseRequest',
   '2': [
     {'1': 'mode', '3': 1, '4': 1, '5': 9, '10': 'mode'},
+    {'1': 'start_address', '3': 2, '4': 1, '5': 3, '10': 'startAddress'},
+    {'1': 'length', '3': 3, '4': 1, '5': 3, '10': 'length'},
   ],
 };
 
 /// Descriptor for `EraseRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List eraseRequestDescriptor =
-    $convert.base64Decode('CgxFcmFzZVJlcXVlc3QSEgoEbW9kZRgBIAEoCVIEbW9kZQ==');
+final $typed_data.Uint8List eraseRequestDescriptor = $convert.base64Decode(
+    'CgxFcmFzZVJlcXVlc3QSEgoEbW9kZRgBIAEoCVIEbW9kZRIjCg1zdGFydF9hZGRyZXNzGAIgAS'
+    'gDUgxzdGFydEFkZHJlc3MSFgoGbGVuZ3RoGAMgASgDUgZsZW5ndGg=');
 
 @$core.Deprecated('Use packInfoDescriptor instead')
 const PackInfo$json = {
@@ -530,3 +536,24 @@ const GetFlashHistoryRequest$json = {
 /// Descriptor for `GetFlashHistoryRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List getFlashHistoryRequestDescriptor =
     $convert.base64Decode('ChZHZXRGbGFzaEhpc3RvcnlSZXF1ZXN0');
+
+@$core.Deprecated('Use clearFlashHistoryRequestDescriptor instead')
+const ClearFlashHistoryRequest$json = {
+  '1': 'ClearFlashHistoryRequest',
+};
+
+/// Descriptor for `ClearFlashHistoryRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List clearFlashHistoryRequestDescriptor =
+    $convert.base64Decode('ChhDbGVhckZsYXNoSGlzdG9yeVJlcXVlc3Q=');
+
+@$core.Deprecated('Use scanPacksRequestDescriptor instead')
+const ScanPacksRequest$json = {
+  '1': 'ScanPacksRequest',
+  '2': [
+    {'1': 'directory', '3': 1, '4': 1, '5': 9, '10': 'directory'},
+  ],
+};
+
+/// Descriptor for `ScanPacksRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List scanPacksRequestDescriptor = $convert.base64Decode(
+    'ChBTY2FuUGFja3NSZXF1ZXN0EhwKCWRpcmVjdG9yeRgBIAEoCVIJZGlyZWN0b3J5');

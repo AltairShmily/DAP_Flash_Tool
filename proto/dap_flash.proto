@@ -20,6 +20,7 @@ service DapFlashService {
   rpc DownloadPack(DownloadRequest) returns (stream ProgressUpdate);
   rpc InstallPack(InstallPackRequest) returns (OperationResult);
   rpc ListInstalledPacks(ListInstalledPacksRequest) returns (InstalledPackList);
+  rpc ScanPacks(ScanPacksRequest) returns (PackList);
 
   // File preview
   rpc PreviewFirmware(PreviewRequest) returns (PreviewResponse);
@@ -27,6 +28,7 @@ service DapFlashService {
 
   // History
   rpc GetFlashHistory(GetFlashHistoryRequest) returns (FlashHistoryList);
+  rpc ClearFlashHistory(ClearFlashHistoryRequest) returns (OperationResult);
 }
 
 message Probe {
@@ -43,8 +45,9 @@ message ProbeList {
 message ConnectRequest {
   string probe_id = 1;
   string target = 2;
-  int32 frequency = 3;
-  string protocol = 4;
+  int32 frequency = 3;   // SWD/JTAG clock in Hz (e.g. 1000000 = 1 MHz)
+  string protocol = 4;   // "swd" or "jtag"
+  string driver = 5;     // "pyocd" or "openocd"; empty = backend default
 }
 
 message ConnectResponse {
@@ -72,6 +75,8 @@ message ProgressUpdate {
   int64 bytes_written = 3;
   int64 total_bytes = 4;
   string message = 5;
+  bool success = 6;    // set on the final update of an operation
+  string error = 7;    // error detail when success = false
 }
 
 message OperationResult {
@@ -85,7 +90,9 @@ message ChipIdResult {
 }
 
 message EraseRequest {
-  string mode = 1;
+  string mode = 1;            // "chip" or "sector"
+  int64 start_address = 2;    // sector mode: first address to erase
+  int64 length = 3;           // sector mode: number of bytes to erase
 }
 
 message PackInfo {
@@ -193,3 +200,8 @@ message ReadChipIdRequest {}
 message ListPacksRequest {}
 message ListInstalledPacksRequest {}
 message GetFlashHistoryRequest {}
+message ClearFlashHistoryRequest {}
+
+message ScanPacksRequest {
+  string directory = 1;  // empty = default packs directory
+}

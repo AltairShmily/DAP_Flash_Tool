@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import dap_flash_pb2 as dap__flash__pb2
+from . import dap_flash_pb2 as dap__flash__pb2
 
 GRPC_GENERATED_VERSION = '1.83.0'
 GRPC_VERSION = grpc.__version__
@@ -99,6 +99,11 @@ class DapFlashServiceStub:
                 request_serializer=dap__flash__pb2.ListInstalledPacksRequest.SerializeToString,
                 response_deserializer=dap__flash__pb2.InstalledPackList.FromString,
                 _registered_method=True)
+        self.ScanPacks = channel.unary_unary(
+                '/dap_flash.DapFlashService/ScanPacks',
+                request_serializer=dap__flash__pb2.ScanPacksRequest.SerializeToString,
+                response_deserializer=dap__flash__pb2.PackList.FromString,
+                _registered_method=True)
         self.PreviewFirmware = channel.unary_unary(
                 '/dap_flash.DapFlashService/PreviewFirmware',
                 request_serializer=dap__flash__pb2.PreviewRequest.SerializeToString,
@@ -113,6 +118,11 @@ class DapFlashServiceStub:
                 '/dap_flash.DapFlashService/GetFlashHistory',
                 request_serializer=dap__flash__pb2.GetFlashHistoryRequest.SerializeToString,
                 response_deserializer=dap__flash__pb2.FlashHistoryList.FromString,
+                _registered_method=True)
+        self.ClearFlashHistory = channel.unary_unary(
+                '/dap_flash.DapFlashService/ClearFlashHistory',
+                request_serializer=dap__flash__pb2.ClearFlashHistoryRequest.SerializeToString,
+                response_deserializer=dap__flash__pb2.OperationResult.FromString,
                 _registered_method=True)
 
 
@@ -200,6 +210,12 @@ class DapFlashServiceServicer:
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ScanPacks(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def PreviewFirmware(self, request, context):
         """File preview
         """
@@ -216,6 +232,12 @@ class DapFlashServiceServicer:
     def GetFlashHistory(self, request, context):
         """History
         """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ClearFlashHistory(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -288,6 +310,11 @@ def add_DapFlashServiceServicer_to_server(servicer, server):
                     request_deserializer=dap__flash__pb2.ListInstalledPacksRequest.FromString,
                     response_serializer=dap__flash__pb2.InstalledPackList.SerializeToString,
             ),
+            'ScanPacks': grpc.unary_unary_rpc_method_handler(
+                    servicer.ScanPacks,
+                    request_deserializer=dap__flash__pb2.ScanPacksRequest.FromString,
+                    response_serializer=dap__flash__pb2.PackList.SerializeToString,
+            ),
             'PreviewFirmware': grpc.unary_unary_rpc_method_handler(
                     servicer.PreviewFirmware,
                     request_deserializer=dap__flash__pb2.PreviewRequest.FromString,
@@ -302,6 +329,11 @@ def add_DapFlashServiceServicer_to_server(servicer, server):
                     servicer.GetFlashHistory,
                     request_deserializer=dap__flash__pb2.GetFlashHistoryRequest.FromString,
                     response_serializer=dap__flash__pb2.FlashHistoryList.SerializeToString,
+            ),
+            'ClearFlashHistory': grpc.unary_unary_rpc_method_handler(
+                    servicer.ClearFlashHistory,
+                    request_deserializer=dap__flash__pb2.ClearFlashHistoryRequest.FromString,
+                    response_serializer=dap__flash__pb2.OperationResult.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -666,6 +698,33 @@ class DapFlashService:
             _registered_method=True)
 
     @staticmethod
+    def ScanPacks(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/dap_flash.DapFlashService/ScanPacks',
+            dap__flash__pb2.ScanPacksRequest.SerializeToString,
+            dap__flash__pb2.PackList.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
     def PreviewFirmware(request,
             target,
             options=(),
@@ -736,6 +795,33 @@ class DapFlashService:
             '/dap_flash.DapFlashService/GetFlashHistory',
             dap__flash__pb2.GetFlashHistoryRequest.SerializeToString,
             dap__flash__pb2.FlashHistoryList.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ClearFlashHistory(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/dap_flash.DapFlashService/ClearFlashHistory',
+            dap__flash__pb2.ClearFlashHistoryRequest.SerializeToString,
+            dap__flash__pb2.OperationResult.FromString,
             options,
             channel_credentials,
             insecure,

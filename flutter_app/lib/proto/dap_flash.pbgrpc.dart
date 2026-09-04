@@ -132,6 +132,13 @@ class DapFlashServiceClient extends $grpc.Client {
     return $createUnaryCall(_$listInstalledPacks, request, options: options);
   }
 
+  $grpc.ResponseFuture<$0.PackList> scanPacks(
+    $0.ScanPacksRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$scanPacks, request, options: options);
+  }
+
   /// File preview
   $grpc.ResponseFuture<$0.PreviewResponse> previewFirmware(
     $0.PreviewRequest request, {
@@ -153,6 +160,13 @@ class DapFlashServiceClient extends $grpc.Client {
     $grpc.CallOptions? options,
   }) {
     return $createUnaryCall(_$getFlashHistory, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.OperationResult> clearFlashHistory(
+    $0.ClearFlashHistoryRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$clearFlashHistory, request, options: options);
   }
 
   // method descriptors
@@ -222,6 +236,11 @@ class DapFlashServiceClient extends $grpc.Client {
           '/dap_flash.DapFlashService/ListInstalledPacks',
           ($0.ListInstalledPacksRequest value) => value.writeToBuffer(),
           $0.InstalledPackList.fromBuffer);
+  static final _$scanPacks =
+      $grpc.ClientMethod<$0.ScanPacksRequest, $0.PackList>(
+          '/dap_flash.DapFlashService/ScanPacks',
+          ($0.ScanPacksRequest value) => value.writeToBuffer(),
+          $0.PackList.fromBuffer);
   static final _$previewFirmware =
       $grpc.ClientMethod<$0.PreviewRequest, $0.PreviewResponse>(
           '/dap_flash.DapFlashService/PreviewFirmware',
@@ -237,6 +256,11 @@ class DapFlashServiceClient extends $grpc.Client {
           '/dap_flash.DapFlashService/GetFlashHistory',
           ($0.GetFlashHistoryRequest value) => value.writeToBuffer(),
           $0.FlashHistoryList.fromBuffer);
+  static final _$clearFlashHistory =
+      $grpc.ClientMethod<$0.ClearFlashHistoryRequest, $0.OperationResult>(
+          '/dap_flash.DapFlashService/ClearFlashHistory',
+          ($0.ClearFlashHistoryRequest value) => value.writeToBuffer(),
+          $0.OperationResult.fromBuffer);
 }
 
 @$pb.GrpcServiceName('dap_flash.DapFlashService')
@@ -341,6 +365,13 @@ abstract class DapFlashServiceBase extends $grpc.Service {
             ($core.List<$core.int> value) =>
                 $0.ListInstalledPacksRequest.fromBuffer(value),
             ($0.InstalledPackList value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.ScanPacksRequest, $0.PackList>(
+        'ScanPacks',
+        scanPacks_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.ScanPacksRequest.fromBuffer(value),
+        ($0.PackList value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.PreviewRequest, $0.PreviewResponse>(
         'PreviewFirmware',
         previewFirmware_Pre,
@@ -364,6 +395,15 @@ abstract class DapFlashServiceBase extends $grpc.Service {
             ($core.List<$core.int> value) =>
                 $0.GetFlashHistoryRequest.fromBuffer(value),
             ($0.FlashHistoryList value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.ClearFlashHistoryRequest, $0.OperationResult>(
+            'ClearFlashHistory',
+            clearFlashHistory_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $0.ClearFlashHistoryRequest.fromBuffer(value),
+            ($0.OperationResult value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.ProbeList> listProbes_Pre($grpc.ServiceCall $call,
@@ -472,6 +512,14 @@ abstract class DapFlashServiceBase extends $grpc.Service {
   $async.Future<$0.InstalledPackList> listInstalledPacks(
       $grpc.ServiceCall call, $0.ListInstalledPacksRequest request);
 
+  $async.Future<$0.PackList> scanPacks_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.ScanPacksRequest> $request) async {
+    return scanPacks($call, await $request);
+  }
+
+  $async.Future<$0.PackList> scanPacks(
+      $grpc.ServiceCall call, $0.ScanPacksRequest request);
+
   $async.Future<$0.PreviewResponse> previewFirmware_Pre($grpc.ServiceCall $call,
       $async.Future<$0.PreviewRequest> $request) async {
     return previewFirmware($call, await $request);
@@ -496,4 +544,13 @@ abstract class DapFlashServiceBase extends $grpc.Service {
 
   $async.Future<$0.FlashHistoryList> getFlashHistory(
       $grpc.ServiceCall call, $0.GetFlashHistoryRequest request);
+
+  $async.Future<$0.OperationResult> clearFlashHistory_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.ClearFlashHistoryRequest> $request) async {
+    return clearFlashHistory($call, await $request);
+  }
+
+  $async.Future<$0.OperationResult> clearFlashHistory(
+      $grpc.ServiceCall call, $0.ClearFlashHistoryRequest request);
 }
